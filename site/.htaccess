@@ -4,6 +4,15 @@ RewriteCond %{SERVER_PORT} !^443$
 RewriteRule .* https://%{SERVER_NAME}%{REQUEST_URI} [R,L]
 # Конец редиректа
 
+<IfModule mod_headers.c>
+  Header set X-Content-Type-Options "nosniff"
+  Header set Strict-Transport-Security "max-age=31536000; includeSubDomains"
+  # Unlike miniapp/, this site is never meant to be iframed by anyone
+  # (it's not a Telegram mini app) — so a plain same-origin policy is safe.
+  Header set X-Frame-Options "SAMEORIGIN"
+  Header set Content-Security-Policy "frame-ancestors 'self'"
+</IfModule>
+
 <Files "telegram-config.php">
   <IfModule mod_authz_core.c>
     Require all denied
