@@ -1,0 +1,451 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Карточный Дом — личный кабинет клуба</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;0,800;0,900;1,500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/styles.css?v=5">
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+</head>
+<body>
+
+<!-- ============ SVG SPRITE ============ -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="sprite-crest" viewBox="600 50 580 1000">
+      <path fill="#BE9972" d="M 816.937 75.7214 C 821.295 78.6307 833.317 100.337 837.159 106.012 C 847.578 121.405 853.522 138.398 869.167 149.477 C 888.295 163.023 931.301 103.505 942.618 110.622 C 943.601 116.867 933.962 203.036 931.164 209.377 C 930.519 210.84 929.58 212.864 929.317 214.432 C 928.967 216.521 939.44 242.207 940.873 247.338 C 949.652 278.759 942.527 304.289 926.962 332.094 C 930.628 331.249 934.317 330.507 938.024 329.868 C 1012 316.512 1099.08 345.179 1099.98 433.633 C 1100.1 445.647 1098.25 454.775 1091.19 464.819 C 1095.92 473.348 1100.18 480.339 1105.68 488.341 C 1111.51 496.834 1120.12 506.546 1124.41 515.594 C 1111.92 531.047 1100.75 525.222 1110.62 546.544 L 1104.93 554.174 L 1108.74 564.6 C 1105.37 568.099 1102.6 571.686 1099.57 575.462 C 1116.24 629.861 1064.96 618.482 1031.21 614.841 C 1004.5 635.045 1004.72 673.695 1007.26 703.712 C 1007.53 706.96 1007.57 707.954 1009.96 709.895 C 1012.58 709.849 1015.03 709.411 1017.1 710.78 C 1018.13 716.84 1017.66 754.927 1017.49 764.079 C 1017.02 788.502 1018.59 816.641 1017.38 840.432 C 1016.99 849.867 1015.81 859.253 1013.86 868.493 C 1001.65 925.401 959.997 970.478 912.808 1001.89 C 898.404 1011.48 883.195 1019.09 868.636 1028.43 C 862.432 1023.8 850.079 1017.32 842.99 1013.15 C 831.223 1006.18 819.823 998.619 808.836 990.481 C 789.218 975.975 773.489 961.377 758.041 942.488 C 756.473 940.571 751.935 935.407 750.247 934.173 C 679.651 882.567 608.384 810.574 623.985 714.752 C 634.739 646.192 690.38 616.077 733.624 569.79 C 752.133 549.801 767.724 527.296 779.935 502.944 C 799.221 466.907 809.586 425.81 837.302 392.321 C 848.646 377.818 865.86 360.047 882.167 351.495 C 906.384 338.796 910.478 335.049 922.515 310.098 C 940.236 273.366 926.24 247.412 913.945 212.191 C 847.735 213.402 780.659 211.815 713.905 212.824 C 705.822 236.26 701.95 243.293 710.381 266.516 C 702.222 286.604 690.26 307.352 685.275 327.905 C 683.442 335.464 705.151 321.036 706.61 345.917 C 735.842 345.737 744.122 352.156 761.18 375.766 C 757.91 376.669 754.695 377.832 751.485 378.936 C 742.204 369.62 720.478 351.094 706.24 356.15 C 699.549 361.447 704.841 370.03 707.492 376.358 C 714.448 376.012 725.238 374.447 730.329 380.13 C 727.594 385.435 719.634 385.544 714.292 386.09 C 711.384 400.234 699.927 431.987 710.538 443.326 C 714.006 441.847 721.053 435.53 724.458 432.582 C 754.21 407.034 782.092 382.937 808.434 353.662 C 832.936 326.433 846.34 289.19 819.101 258.331 C 812.54 250.898 788.566 242.196 788.041 233.36 C 790.5 231.736 801.075 232.985 804.044 233.966 C 834.395 243.998 854.484 281.401 846.513 311.411 C 833.466 360.53 790.382 389.674 756.046 423.353 C 744.595 434.585 732.452 445.198 719.959 454.968 C 712.444 460.163 699.715 456.247 696.434 447.38 C 688.958 427.174 695.599 407.687 703.013 388.791 C 699.612 386.072 697.116 384.478 695.848 380.416 C 699.252 369.019 696.704 368.824 691.206 361.9 C 689.403 359.629 693 346.64 694.017 342.421 C 684.602 340.734 674.972 340.673 670.659 330.905 C 670.715 323.062 692.097 278.003 696.845 267.058 C 694.394 258.457 690.409 244.318 692.984 235.249 C 694.995 228.164 699.862 221.624 699.361 213.165 C 698.538 212.924 694.373 211.816 694.322 211.069 C 693.5 199.087 689.749 113.325 693.623 109.95 C 702.341 112.877 721.968 130.756 730.221 137.389 C 753.334 155.965 762.629 158.304 780.153 131.619 C 791.853 113.801 804.425 93.489 816.937 75.7214 z"/>
+      <path fill="#260403" d="M 963.727 341.426 C 983.468 338.929 1010.4 343.786 1028.1 350.43 C 1067.41 365.184 1096.44 409.573 1082.58 451.056 C 1079.66 459.784 1040.81 460.571 1036.38 468.01 C 1040.5 479.282 1073.02 469.618 1081.4 465.983 C 1083.31 482.16 1099.93 500.782 1110.09 513.747 C 1094.95 524.958 1089.92 523.315 1098.67 542.388 C 1092.52 547.08 1087.76 547.563 1082.89 554.638 C 1084.97 558.486 1091.12 553.016 1094.68 560.075 C 1094.29 564.131 1091.47 567.01 1088.92 570.436 C 1089.11 576.579 1090.9 588.426 1091.62 595.068 C 1073.66 622.105 1034.84 587.254 1013.34 612.884 C 990.212 640.464 992.612 676.326 993.889 709.804 C 975.934 708.316 948.408 709.411 929.892 709.692 C 928.66 707.036 927.48 704.356 926.352 701.655 C 906.858 654.546 942.919 605.531 964.683 567.034 C 971.918 554.064 978.375 540.676 984.019 526.938 C 960.937 541.221 954.328 555.905 941.483 578.094 C 914.292 625.066 897.568 656.48 915.99 709.946 C 902.919 710.093 889.479 710.441 876.463 709.627 C 874.15 706.4 871.482 701.851 869.315 698.402 C 863.873 702.637 861.223 705.706 854.967 709.903 C 849.133 710.163 842.66 710.062 836.804 709.92 C 806.557 709.189 775.462 710.823 745.318 708.94 C 766.382 688.232 800.263 669.391 825.747 653.651 C 851.433 636.991 902.719 603.888 919.311 578.822 C 918.455 575.248 917.087 570.978 916.046 567.382 C 910.785 571.052 904.603 576.497 899.919 580.918 C 858.664 619.854 809.485 646.531 762.188 676.991 C 746.085 687.361 733.352 701.043 718.02 711.996 C 718.61 741.821 717.608 771.967 717.955 801.833 C 718.241 826.479 716.608 850.869 723.93 874.864 C 726.681 883.883 729.276 892.974 731.826 902.032 C 730.522 901.072 729.252 900.068 728.016 899.022 C 683.721 861.818 642.018 811.969 637.031 752.011 C 634.656 724.945 640.7 697.806 654.337 674.306 C 671.478 644.704 694.32 627.996 718.82 605.359 C 735.046 590.367 753.073 571.831 765.968 553.892 C 779.201 535.256 790.608 515.389 800.033 494.566 C 816.988 457.92 826.645 426.712 854.259 394.663 C 884.732 359.295 917.686 344.895 963.727 341.426 z"/>
+      <path fill="#BE9972" d="M 954.197 518.429 C 984.958 495.73 1019.11 440.764 1033.13 404.912 C 1034.99 400.173 1040.85 383.654 1044.43 383.206 C 1046.77 385.903 1047.93 389.142 1047.16 393.015 C 1037.98 439.158 1005.85 490.547 971.049 521.859 C 969.34 523.397 962.692 527.705 961.001 528.436 C 956.492 528.511 955.017 530.816 950.984 526.8 C 951.164 521.943 951.334 523.168 954.197 518.429 z"/>
+      <path fill="#BE9972" d="M 926.369 550.029 C 913.689 553.449 901.778 549.151 894.814 537.877 C 889.811 529.653 888.296 519.772 890.606 510.427 C 898.314 479.127 939.11 472.061 955.144 502.412 L 946.799 510.868 C 943.985 507.225 941.157 503.273 937.328 500.481 C 920.127 487.94 898.74 505.499 903.29 524.847 C 904.507 530.023 906.789 531.968 911.305 534.627 C 915.671 534.23 918.101 532.569 922.012 530.561 C 926.735 535.644 930.19 534.378 934.499 541.538 L 926.369 550.029 z"/>
+      <path fill="#A26F43" d="M 911.305 534.627 C 915.671 534.23 918.101 532.569 922.012 530.561 C 926.735 535.644 930.19 534.378 934.499 541.538 L 926.369 550.029 L 925.347 549.115 C 923.767 547.677 921.643 545.682 921.557 543.662 C 924.691 543.424 926.963 543.581 928.394 540.491 L 926.435 539.106 C 919.687 538.986 918.139 538.66 912.396 535.282 L 911.305 534.627 z"/>
+      <path fill="#AA8060" d="M 954.197 518.429 C 951.334 523.168 951.164 521.943 950.984 526.8 C 955.017 530.816 956.492 528.511 961.001 528.436 C 952.205 535.249 950.17 527.353 934.499 541.538 C 930.19 534.378 926.735 535.644 922.012 530.561 C 934.628 524.716 943.766 526.355 954.197 518.429 z"/>
+      <path fill="#260403" d="M 869.134 714.064 C 871.617 715.722 874.492 719.886 876.507 722.426 C 890.589 724.474 911.487 723.876 926.104 723.895 L 1002.79 723.966 L 1002.59 802.141 C 1002.54 817.361 1003.07 835.644 1001.45 850.522 C 995.746 902.86 964.244 942.568 924.717 974.642 C 918.503 979.685 873.672 1011.26 867.58 1010.54 C 804.232 973.536 741.125 926.78 733.462 846.785 C 732.001 831.535 732.462 815.264 732.489 799.915 C 732.668 774.582 732.546 749.248 732.126 723.917 L 804.872 724.096 C 830.107 724.173 846.775 727.874 869.134 714.064 z"/>
+      <path fill="#BE9972" d="M 868.71 758.654 C 871.257 761.054 880.904 775.831 883.447 779.554 C 899.815 803.524 920.304 825.553 936.692 849.265 C 918.612 867.214 883.03 917.703 868.846 938.894 C 846.943 907.503 823.825 876.978 799.544 847.387 C 828.441 816.702 844.137 789.162 868.71 758.654 z"/>
+      <path fill="#63060F" d="M 868.542 783.698 C 872.094 787.272 881.142 800.23 884.8 805.112 C 895.791 819.534 906.668 834.042 917.432 848.635 C 900.27 871.296 885.252 891.226 868.604 914.515 C 866.125 911.336 863.845 908.006 861.526 904.709 C 847.786 885.178 832.619 866.716 818.54 847.434 C 835.38 828.081 852.952 804.219 868.542 783.698 z"/>
+      <path fill="#260403" d="M 816.85 101.753 C 826.197 110.822 838.68 137.133 847.597 148.729 C 875.303 184.754 900.403 155.548 925.996 137.244 C 923.345 153.862 919.946 182.615 918.815 199.097 C 886.581 198.09 850.728 198.861 818.25 198.941 C 781.353 198.803 744.456 198.892 707.56 199.205 C 707.302 178.448 706.712 158.092 706.952 137.292 C 723.386 147.766 742.175 170.743 762.545 164.883 C 784.302 158.624 805.134 120.476 816.85 101.753 z"/>
+    </symbol>
+
+    <symbol id="i-diamond" viewBox="0 0 16 16"><path d="M8 1 L15 8 L8 15 L1 8 Z"/></symbol>
+    <symbol id="i-home" viewBox="0 0 24 24"><path d="M3 11 L12 3 L21 11 M5 10 V20 H19 V10" stroke-linejoin="round" stroke-linecap="round"/></symbol>
+    <symbol id="i-cards" viewBox="0 0 24 24"><rect x="3" y="6" width="13" height="16" rx="2" stroke-linejoin="round"/><path d="M8 3 H19 a2 2 0 0 1 2 2 V17" stroke-linejoin="round"/></symbol>
+    <symbol id="i-trophy" viewBox="0 0 24 24"><path d="M7 4H17V10A5 5 0 0 1 7 10V4Z" stroke-linejoin="round"/><path d="M7 6H4A3 3 0 0 0 7 12M17 6H20A3 3 0 0 1 17 12" stroke-linecap="round"/><path d="M12 15V19M8 21H16" stroke-linecap="round"/></symbol>
+    <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21C4 16.6 7.6 14 12 14C16.4 14 20 16.6 20 21" stroke-linecap="round"/></symbol>
+    <symbol id="i-qr" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" stroke-linejoin="round"/><rect x="14" y="3" width="7" height="7" stroke-linejoin="round"/><rect x="3" y="14" width="7" height="7" stroke-linejoin="round"/><path d="M14 14H17V17H14ZM19 14H21V16H19ZM14 19H16V21H14ZM18 18H21V21H18Z" fill="currentColor" stroke="none"/></symbol>
+    <symbol id="i-mail" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2" stroke-linejoin="round"/><path d="M4 7 L12 13 L20 7" stroke-linejoin="round" stroke-linecap="round"/></symbol>
+    <symbol id="i-chevron-down" viewBox="0 0 16 16"><path d="M3 6 L8 11 L13 6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-chevron-right" viewBox="0 0 16 16"><path d="M6 3 L11 8 L6 13" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-close" viewBox="0 0 16 16"><path d="M2 2 L14 14 M14 2 L2 14" stroke-linecap="round"/></symbol>
+    <symbol id="i-calendar" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 9H21M8 3V6M16 3V6" stroke-linecap="round"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7V12L16 14" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-people" viewBox="0 0 24 24"><circle cx="8" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M2 20C2 16 4.7 14 8 14C11.3 14 14 16 14 20M14.5 15C17.5 15 20 16.8 20.5 20" stroke-linecap="round"/></symbol>
+    <symbol id="i-fire" viewBox="0 0 24 24"><path d="M12 2C12 6 8 8 8 12A4 4 0 0 0 16 12C16 10 15 9 15 9C16 11 14 13 12 13A5 5 0 0 1 8 17A5 5 0 0 0 12 22A7 7 0 0 0 19 15C19 9 12 8 12 2Z" stroke-linejoin="round"/></symbol>
+    <symbol id="i-flag" viewBox="0 0 24 24"><path d="M5 3V21" stroke-linecap="round"/><path d="M5 4H14L12 7L14 10H5" stroke-linejoin="round"/></symbol>
+    <symbol id="i-swords" viewBox="0 0 24 24"><path d="M3 3L13 13M13 3L3 13" stroke-linecap="round"/><path d="M15 15L21 21M13 17L17 21M17 13L21 17" stroke-linecap="round"/></symbol>
+    <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 22C12 22 19 15.5 19 10A7 7 0 0 0 5 10C5 15.5 12 22 12 22Z" stroke-linejoin="round"/><circle cx="12" cy="10" r="2.5"/></symbol>
+    <symbol id="i-question" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.5 9A2.5 2.5 0 0 1 14 10.5C14 12 12 12.2 12 14" stroke-linecap="round"/><circle cx="12" cy="17.3" r="0.6" fill="currentColor" stroke="none"/></symbol>
+    <symbol id="i-chat" viewBox="0 0 24 24"><path d="M3 5H21V16H8L4 19V16H3Z" stroke-linejoin="round"/></symbol>
+    <symbol id="i-spade" viewBox="0 0 24 24"><path d="M12 3C9 7 4 10 4 14A5 5 0 0 0 12 16.5A5 5 0 0 0 20 14C20 10 15 7 12 3Z" stroke-linejoin="round"/><path d="M12 16V21M9 21H15" stroke-linecap="round"/></symbol>
+    <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3V15M7 10L12 15L17 10" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 19H20" stroke-linecap="round"/></symbol>
+    <symbol id="i-settings" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2"/><path d="M19 12A7 7 0 0 0 18.6 9.8L20.5 8L18.5 4.6L16.3 5.5A7 7 0 0 0 14 4.2L13.6 2H10.4L10 4.2A7 7 0 0 0 7.7 5.5L5.5 4.6L3.5 8L5.4 9.8A7 7 0 0 0 5 12A7 7 0 0 0 5.4 14.2L3.5 16L5.5 19.4L7.7 18.5A7 7 0 0 0 10 19.8L10.4 22H13.6L14 19.8A7 7 0 0 0 16.3 18.5L18.5 19.4L20.5 16L18.6 14.2A7 7 0 0 0 19 12Z" stroke-linejoin="round"/></symbol>
+    <symbol id="i-logout" viewBox="0 0 24 24"><path d="M15 4H19V20H15" stroke-linecap="round" stroke-linejoin="round"/><path d="M11 8L4 12L11 16M4 12H16" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-joker" viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2"/><circle cx="12" cy="9" r="2.6"/><path d="M8 16C8 13.5 9.8 12.5 12 12.5C14.2 12.5 16 13.5 16 16" stroke-linecap="round"/></symbol>
+    <symbol id="i-arrow-left" viewBox="0 0 24 24"><path d="M19 12H5M11 6L5 12L11 18" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M7 10V7A5 5 0 0 1 17 7V10" stroke-linecap="round"/></symbol>
+  </defs>
+</svg>
+
+<div class="app" id="app">
+  <div class="app__pattern" aria-hidden="true"></div>
+
+  <!-- fake Telegram WebApp chrome, for prototype preview only -->
+  <div class="tg-bar">
+    <svg class="tg-bar__close" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><use href="#i-close"/></svg>
+    <div class="tg-bar__title">
+      <svg viewBox="0 0 16 16" fill="var(--brass)"><use href="#i-diamond"/></svg>
+      <span>Карточный Дом | Клуб</span>
+    </div>
+    <svg class="tg-bar__dots" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg>
+  </div>
+
+  <!-- ============ ГЛАВНАЯ ============ -->
+  <section class="screen screen--home" data-screen="home" data-active="true">
+    <header class="brand-header">
+      <svg class="brand-header__crest"><use href="#sprite-crest"/></svg>
+      <img class="brand-header__word" src="assets/img/wordmark.svg" alt="Карточный Дом">
+      <p class="brand-header__tag">Клуб интеллектуальной игры</p>
+    </header>
+
+    <button type="button" class="mini-profile" data-nav="profile">
+      <span class="avatar avatar--sm" style="background:linear-gradient(145deg,#8FB8D6,#4d6f89)">М</span>
+      <span class="mini-profile__body">
+        <span class="mini-profile__name">Михаил</span>
+        <span class="mini-profile__meta">
+          <span class="rank-badge rank-rookie">
+            <span class="rank-badge__icon"><svg viewBox="0 0 16 16" fill="currentColor"><use href="#i-diamond"/></svg></span>
+            Rookie
+          </span>
+        </span>
+      </span>
+      <span class="mini-profile__points"><svg fill="currentColor"><use href="#i-diamond"/></svg>0</span>
+      <svg class="mini-profile__chevron" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><use href="#i-chevron-right"/></svg>
+    </button>
+
+    <div class="promo">
+      <div class="promo__row">
+        <span class="promo__icon">🎁</span>
+        <div>
+          <p class="promo__title">Ваш первый вход — бесплатный</p>
+          <p class="promo__text">По промокоду <b>first free</b> первый турнир — за счёт клуба. Покажите QR администратору на входе.</p>
+        </div>
+      </div>
+      <button type="button" class="btn" data-open-sheet="qr">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><use href="#i-qr"/></svg>
+        Показать QR для входа
+      </button>
+    </div>
+
+    <div class="section-title" style="padding:0 20px 12px">
+      <h2>Ближайший турнир</h2>
+      <button type="button" class="link" data-nav="tournaments">Все →</button>
+    </div>
+    <div class="t-list" style="padding-bottom:24px" data-featured-tournament></div>
+
+    <div class="acc-list">
+      <div class="acc" data-acc>
+        <button type="button" class="acc__head" data-acc-head>
+          <span class="acc__icon">❓</span>
+          <span class="acc__title">Вопросы и ответы</span>
+          <svg class="acc__chevron" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><use href="#i-chevron-down"/></svg>
+        </button>
+        <div class="acc__body"><p>Отвечаем на частые вопросы о правилах клуба, записи на турниры и системе очков. Если не нашли ответ — напишите в поддержку.</p></div>
+      </div>
+      <div class="acc" data-acc>
+        <button type="button" class="acc__head" data-acc-head>
+          <span class="acc__icon">💬</span>
+          <span class="acc__title">Поддержка</span>
+          <svg class="acc__chevron" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><use href="#i-chevron-down"/></svg>
+        </button>
+        <div class="acc__body"><p>Свяжитесь с администратором клуба напрямую в Telegram — ответим в течение часа.</p></div>
+      </div>
+      <div class="acc" data-acc>
+        <button type="button" class="acc__head" data-acc-head>
+          <span class="acc__icon">♠️</span>
+          <span class="acc__title">О клубе</span>
+          <svg class="acc__chevron" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><use href="#i-chevron-down"/></svg>
+        </button>
+        <div class="acc__body"><p>Карточный Дом — петербургский клуб интеллектуальной игры. Турниры без денежного банка, только очки, ранги и статус в сообществе.</p></div>
+      </div>
+    </div>
+
+    <button type="button" class="list-row" id="addressRow" style="width:calc(100% - 40px);text-align:left">
+      <span class="list-row__icon"><svg fill="none" stroke="currentColor"><use href="#i-pin"/></svg></span>
+      <span class="list-row__body">
+        <span class="list-row__title">Адрес клуба</span>
+        <span class="list-row__sub">СПБ, Боровая улица, 19А</span>
+      </span>
+      <svg class="chev" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><use href="#i-chevron-right"/></svg>
+    </button>
+  </section>
+
+  <!-- ============ ТУРНИРЫ ============ -->
+  <section class="screen" data-screen="tournaments">
+    <div class="topbar"><h1>Турниры</h1></div>
+    <div class="tabs" role="tablist">
+      <button type="button" class="tab" role="tab" aria-selected="true" data-sub-tab="upcoming" data-group="tournaments">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" style="width:15px;height:15px"><use href="#i-fire"/></svg>
+        Актуальные
+      </button>
+      <button type="button" class="tab" role="tab" aria-selected="false" data-sub-tab="past" data-group="tournaments">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" style="width:15px;height:15px"><use href="#i-flag"/></svg>
+        Прошедшие
+      </button>
+    </div>
+
+    <div class="t-list" data-panel="tournaments-upcoming"></div>
+    <div class="t-list" data-panel="tournaments-past" hidden></div>
+  </section>
+
+  <!-- ============ ДЕТАЛИ ТУРНИРА ============ -->
+  <section class="screen" data-screen="tournament-detail">
+    <div class="t-detail__hero">
+      <img class="t-detail__img" data-td="img" src="" alt="">
+      <button type="button" class="t-detail__back" data-nav="tournaments" aria-label="Назад к турнирам">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><use href="#i-arrow-left"/></svg>
+      </button>
+      <span class="t-card__badge" data-td="badge" style="top:18px;right:18px"></span>
+      <span class="t-detail__title" data-td="title"></span>
+    </div>
+
+    <div class="t-detail__meta" data-td="meta"></div>
+
+    <div class="section" data-td="result-wrap" hidden>
+      <div class="t-detail__result" data-td="result"></div>
+    </div>
+
+    <div class="section">
+      <h2 class="t-detail__h">Описание</h2>
+      <p class="t-detail__desc" data-td="desc"></p>
+    </div>
+
+    <div class="section">
+      <h2 class="t-detail__h">Правила</h2>
+      <ul class="t-detail__rules" data-td="rules"></ul>
+    </div>
+
+    <div class="t-detail__actionbar" data-td="actionbar">
+      <button type="button" class="btn btn--primary" data-td="action" style="width:100%"></button>
+    </div>
+  </section>
+
+  <!-- ============ РЕЙТИНГ ============ -->
+  <section class="screen" data-screen="rating">
+    <div class="topbar"><h1>Рейтинг</h1></div>
+    <div class="tabs tabs--3" role="tablist">
+      <button type="button" class="tab" role="tab" aria-selected="true" data-sub-tab="season" data-group="rating">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" style="width:15px;height:15px"><use href="#i-calendar"/></svg>
+        Сезон
+      </button>
+      <button type="button" class="tab" role="tab" aria-selected="false" data-sub-tab="all" data-group="rating">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" style="width:15px;height:15px"><use href="#i-trophy"/></svg>
+        Всё
+      </button>
+      <button type="button" class="tab tab--special" role="tab" aria-selected="false" data-sub-tab="special" data-group="rating">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" style="width:15px;height:15px"><use href="#i-swords"/></svg>
+        Спец зачёт
+      </button>
+    </div>
+
+    <div class="special-info" data-panel="rating-special" hidden>
+      <div class="special-info__body">
+        <div class="special-info__title">⚔ Битва клубов 3.0 · 12 авг – 4 сент</div>
+        <div class="special-info__text">Топ-9 представят Карточный Дом на Кубке клубов</div>
+      </div>
+      <button type="button" class="special-info__info" data-open-sheet="special-info">i</button>
+    </div>
+
+    <div class="podium">
+      <div class="podium__item podium__item--second">
+        <span class="podium__rank podium__rank--2">2</span>
+        <span class="avatar avatar--top" style="background:linear-gradient(145deg,#8FB8D6,#4d6f89)">A</span>
+        <span class="podium__name">Acidhouze_</span>
+        <span class="podium__points"><svg fill="currentColor"><use href="#i-diamond"/></svg>5,984</span>
+      </div>
+      <div class="podium__item podium__item--first">
+        <span class="podium__rank podium__rank--1">1</span>
+        <span class="avatar avatar--top" style="background:linear-gradient(145deg,var(--gold),#8a6f2f)">S</span>
+        <span class="podium__name">starzzen</span>
+        <span class="podium__points"><svg fill="currentColor"><use href="#i-diamond"/></svg>6,592</span>
+      </div>
+      <div class="podium__item podium__item--third">
+        <span class="podium__rank podium__rank--3">3</span>
+        <span class="avatar avatar--top" style="background:linear-gradient(145deg,#C69C6D,#7a5a37)">R</span>
+        <span class="podium__name">Randevu</span>
+        <span class="podium__points"><svg fill="currentColor"><use href="#i-diamond"/></svg>4,525</span>
+      </div>
+    </div>
+
+    <div class="rate-list" data-rate-list>
+      <!-- rows 4+ injected by JS from mock data -->
+    </div>
+  </section>
+
+  <!-- ============ ПРОФИЛЬ ============ -->
+  <section class="screen" data-screen="profile">
+    <div class="topbar">
+      <h1>Профиль</h1>
+      <div class="topbar__icons">
+        <button type="button" class="icon-btn" data-stub="Экспорт данных будет доступен после подключения бэкенда" aria-label="Скачать данные"><svg fill="none" stroke="currentColor"><use href="#i-download"/></svg></button>
+        <button type="button" class="icon-btn" data-stub="Настройки аккаунта — скоро" aria-label="Настройки"><svg fill="none" stroke="currentColor"><use href="#i-settings"/></svg></button>
+        <button type="button" class="icon-btn" data-stub="Выход из аккаунта — скоро" aria-label="Выйти"><svg fill="none" stroke="currentColor"><use href="#i-logout"/></svg></button>
+      </div>
+    </div>
+
+    <div class="profile-card">
+      <span class="avatar avatar--md" style="background:linear-gradient(145deg,#8FB8D6,#4d6f89)">М</span>
+      <div class="profile-card__body">
+        <div class="profile-card__name">Михаил</div>
+        <div class="profile-card__handle">@mikechaschin</div>
+        <div class="profile-card__badge">
+          <span class="rank-badge rank-rookie">
+            <span class="rank-badge__icon"><svg viewBox="0 0 16 16" fill="currentColor"><use href="#i-diamond"/></svg></span>
+            Rookie
+          </span>
+        </div>
+        <div class="profile-card__foot">
+          <span class="profile-card__points"><svg fill="currentColor"><use href="#i-diamond"/></svg>0 очков</span>
+          <span class="profile-card__next">до Fish: 201</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="stat-grid">
+      <div class="stat-tile"><div class="stat-tile__val">0</div><div class="stat-tile__label">Игр</div></div>
+      <div class="stat-tile"><div class="stat-tile__val stat-tile__val--gold">0</div><div class="stat-tile__label">Побед</div></div>
+      <div class="stat-tile"><div class="stat-tile__val" style="color:var(--ash)">—</div><div class="stat-tile__label">Серия</div></div>
+    </div>
+
+    <div class="list-row" data-open-sheet="qr" style="cursor:pointer">
+      <span class="list-row__icon"><svg fill="none" stroke="currentColor"><use href="#i-qr"/></svg></span>
+      <span class="list-row__body"><span class="list-row__title">Моя карточка (QR)</span></span>
+      <span class="link" style="font-size:13px;font-weight:700">Показать →</span>
+    </div>
+
+    <div class="section-title" style="padding:20px 20px 12px">
+      <h2>Топ сезона</h2>
+      <button type="button" class="link" data-nav="rating">Все →</button>
+    </div>
+    <div class="card" style="margin:0 20px 8px;padding:6px 10px">
+      <div class="rate-row" style="border-bottom:1px solid rgba(200,168,109,0.1)">
+        <span class="rate-row__medal">🥇</span>
+        <span class="avatar avatar--xs" style="background:linear-gradient(145deg,var(--gold),#8a6f2f)">S</span>
+        <span class="rate-row__body"><span class="rate-row__name">starzzen</span></span>
+        <span class="rate-row__points"><svg fill="currentColor"><use href="#i-diamond"/></svg>6,592</span>
+      </div>
+      <div class="rate-row" style="border-bottom:1px solid rgba(200,168,109,0.1)">
+        <span class="rate-row__medal">🥈</span>
+        <span class="avatar avatar--xs" style="background:linear-gradient(145deg,#8FB8D6,#4d6f89)">A</span>
+        <span class="rate-row__body"><span class="rate-row__name">Acidhouze_</span></span>
+        <span class="rate-row__points"><svg fill="currentColor"><use href="#i-diamond"/></svg>5,984</span>
+      </div>
+      <div class="rate-row" style="border-bottom:none">
+        <span class="rate-row__medal">🥉</span>
+        <span class="avatar avatar--xs" style="background:linear-gradient(145deg,#C69C6D,#7a5a37)">R</span>
+        <span class="rate-row__body"><span class="rate-row__name">Randevu</span></span>
+        <span class="rate-row__points"><svg fill="currentColor"><use href="#i-diamond"/></svg>4,525</span>
+      </div>
+    </div>
+
+    <div class="section-title" style="padding:20px 20px 12px">
+      <h2>История игр</h2>
+    </div>
+    <div class="tabs" role="tablist">
+      <button type="button" class="tab" role="tab" aria-selected="true" data-sub-tab="active" data-group="history">Активные</button>
+      <button type="button" class="tab" role="tab" aria-selected="false" data-sub-tab="past" data-group="history">Прошедшие</button>
+    </div>
+    <div data-panel="history-active">
+      <div class="empty-state">
+        <svg class="empty-icon" viewBox="0 0 24 24" fill="none" stroke="var(--ash)" stroke-width="1.3" style="width:44px;height:44px;margin:0 auto 12px;opacity:.6"><use href="#i-joker"/></svg>
+        <p>Турниров ещё нет</p>
+      </div>
+    </div>
+    <div data-panel="history-past" hidden>
+      <div class="empty-state">
+        <svg class="empty-icon" viewBox="0 0 24 24" fill="none" stroke="var(--ash)" stroke-width="1.3" style="width:44px;height:44px;margin:0 auto 12px;opacity:.6"><use href="#i-joker"/></svg>
+        <p>Турниров ещё нет</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ NAV ============ -->
+  <nav class="bottom-nav">
+    <button type="button" class="nav-btn" aria-current="true" data-nav="home">
+      <svg fill="none" stroke="currentColor"><use href="#i-home"/></svg><span>Главная</span>
+    </button>
+    <button type="button" class="nav-btn" data-nav="tournaments">
+      <svg fill="none" stroke="currentColor"><use href="#i-cards"/></svg><span>Турниры</span>
+    </button>
+    <button type="button" class="nav-btn" data-nav="rating">
+      <svg fill="none" stroke="currentColor"><use href="#i-trophy"/></svg><span>Рейтинг</span>
+    </button>
+    <button type="button" class="nav-btn" data-nav="profile">
+      <svg fill="none" stroke="currentColor"><use href="#i-user"/></svg><span>Профиль</span>
+    </button>
+  </nav>
+
+  <button type="button" class="fab-qr" data-open-sheet="qr" aria-label="Показать QR">
+    <svg fill="none" stroke="currentColor"><use href="#i-qr"/></svg>
+  </button>
+
+  <!-- ============ SHEETS ============ -->
+  <div class="sheet-overlay" data-sheet-overlay="nickname" data-open="true">
+    <div class="sheet">
+      <div class="sheet__grip"></div>
+      <div class="sheet__icon"><svg fill="none" stroke="currentColor"><use href="#i-user"/></svg></div>
+      <h3 class="sheet__title">Ваш ник в клубе</h3>
+      <p class="sheet__text">Под этим ником ты появишься в рейтинге и в списках турниров. Можешь оставить как есть или изменить.</p>
+      <span class="sheet__label">Ник</span>
+      <input class="sheet__input" id="nicknameInput" type="text" value="mikechaschin" maxlength="20">
+      <p class="sheet__hint" data-nick-hint>От 2 до 20 символов. Запрещены оскорбления и системные слова.</p>
+      <p class="sheet__error" data-nick-error hidden></p>
+      <button type="button" class="btn btn--primary" id="nicknameConfirm">Подтвердить и продолжить</button>
+      <button type="button" class="btn btn--ghost" data-close-sheet="nickname" style="margin:0 auto">Отмена</button>
+    </div>
+  </div>
+
+  <div class="sheet-overlay" data-sheet-overlay="email">
+    <div class="sheet">
+      <button type="button" class="sheet__close" data-close-sheet="email"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><use href="#i-close"/></svg></button>
+      <div class="sheet__icon"><svg fill="none" stroke="currentColor"><use href="#i-mail"/></svg></div>
+      <h3 class="sheet__title">Добавьте Email</h3>
+      <p class="sheet__text">Чтобы получать уведомления о турнирах и результатах — укажите почту.</p>
+      <input class="sheet__input" id="emailInput" type="email" placeholder="name@example.com">
+      <button type="button" class="btn btn--primary" id="emailSubmit" style="margin-top:12px">Получить код</button>
+      <button type="button" class="btn btn--ghost" data-close-sheet="email" style="margin:0 auto">Пропустить</button>
+    </div>
+  </div>
+
+  <div class="sheet-overlay" data-sheet-overlay="otp">
+    <div class="sheet">
+      <button type="button" class="sheet__close" data-close-sheet="otp"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><use href="#i-close"/></svg></button>
+      <div class="sheet__icon"><svg fill="none" stroke="currentColor"><use href="#i-lock"/></svg></div>
+      <h3 class="sheet__title">Введите код</h3>
+      <p class="sheet__text">Мы отправили 4-значный код на <b id="otpEmailTarget" style="color:var(--ivory)">почту</b></p>
+      <div class="otp-inputs" id="otpInputs">
+        <input class="otp-box" inputmode="numeric" pattern="[0-9]*" maxlength="1">
+        <input class="otp-box" inputmode="numeric" pattern="[0-9]*" maxlength="1">
+        <input class="otp-box" inputmode="numeric" pattern="[0-9]*" maxlength="1">
+        <input class="otp-box" inputmode="numeric" pattern="[0-9]*" maxlength="1">
+      </div>
+      <p class="sheet__hint" style="text-align:center">Отправить код повторно через <span id="otpTimer">00:59</span></p>
+      <button type="button" class="btn btn--ghost" id="otpResend" style="margin:0 auto 12px" disabled>Отправить ещё раз</button>
+      <button type="button" class="btn btn--primary" id="otpConfirm">Подтвердить</button>
+    </div>
+  </div>
+
+  <div class="sheet-overlay" data-sheet-overlay="special-info">
+    <div class="sheet">
+      <button type="button" class="sheet__close" data-close-sheet="special-info"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><use href="#i-close"/></svg></button>
+      <div class="sheet__icon"><svg fill="none" stroke="currentColor"><use href="#i-swords"/></svg></div>
+      <h3 class="sheet__title">Битва клубов 3.0</h3>
+      <p class="sheet__text">12 августа – 4 сентября. Отдельный зачёт очков, который не смешивается с сезонным рейтингом — считаются только турниры с пометкой «Битва клубов». Топ-9 игроков по итогам зачёта представят Карточный Дом на межклубном Кубке.</p>
+      <button type="button" class="btn btn--primary" data-close-sheet="special-info">Понятно</button>
+    </div>
+  </div>
+
+  <div class="sheet-overlay" data-sheet-overlay="qr">
+    <div class="sheet">
+      <button type="button" class="sheet__close" data-close-sheet="qr"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><use href="#i-close"/></svg></button>
+      <h3 class="sheet__title" style="margin-top:8px">Ваша карточка</h3>
+      <p class="sheet__text">Покажите QR администратору клуба для идентификации</p>
+      <div class="qr-sheet__code">
+        <svg viewBox="0 0 29 29" shape-rendering="crispEdges">
+          <rect width="29" height="29" fill="#F2E8D9"/>
+          <g fill="#170608">
+            <rect x="0" y="0" width="7" height="7"/><rect x="1" y="1" width="5" height="5" fill="#F2E8D9"/><rect x="2" y="2" width="3" height="3"/>
+            <rect x="22" y="0" width="7" height="7"/><rect x="23" y="1" width="5" height="5" fill="#F2E8D9"/><rect x="24" y="2" width="3" height="3"/>
+            <rect x="0" y="22" width="7" height="7"/><rect x="1" y="23" width="5" height="5" fill="#F2E8D9"/><rect x="2" y="24" width="3" height="3"/>
+            <rect x="9" y="1" width="2" height="2"/><rect x="13" y="1" width="3" height="2"/><rect x="18" y="1" width="2" height="3"/>
+            <rect x="9" y="4" width="4" height="2"/><rect x="16" y="4" width="2" height="4"/>
+            <rect x="9" y="9" width="4" height="4"/><rect x="15" y="9" width="7" height="2"/><rect x="9" y="14" width="2" height="6"/>
+            <rect x="12" y="10" width="3" height="3"/><rect x="17" y="12" width="4" height="4"/><rect x="12" y="15" width="6" height="2"/>
+            <rect x="9" y="18" width="2" height="2"/><rect x="12" y="19" width="2" height="2"/><rect x="16" y="18" width="6" height="2"/>
+            <rect x="22" y="9" width="2" height="7"/><rect x="25" y="10" width="2" height="2"/><rect x="25" y="15" width="2" height="3"/>
+            <rect x="9" y="22" width="7" height="2"/><rect x="18" y="22" width="2" height="2"/><rect x="22" y="22" width="2" height="2"/><rect x="26" y="22" width="2" height="2"/>
+            <rect x="18" y="25" width="6" height="2"/><rect x="9" y="25" width="2" height="2"/>
+          </g>
+        </svg>
+      </div>
+      <div class="qr-sheet__name">Михаил</div>
+      <div class="qr-sheet__id">ID KD-000482</div>
+    </div>
+  </div>
+
+  <div class="toast" data-toast></div>
+</div>
+
+<script src="assets/js/app.js?v=5"></script>
+</body>
+</html>

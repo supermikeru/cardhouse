@@ -1,0 +1,7 @@
+.DS_Store
+.deploy.conf
+bot/.env
+bot/__pycache__/
+bot/**/__pycache__/
+bot/venv/
+site/telegram-config.php
