@@ -9,11 +9,22 @@ import keyboards
 
 router = Router(name="start")
 
+_MAX_NICKNAME_LEN = 40
+
+
+def _sanitize_nickname(raw: str) -> str:
+    # Telegram first_name is free-form Unicode with no length practical limit
+    # enforced client-side here; the frontend HTML-escapes nicknames before
+    # rendering, but stripping control/formatting characters and capping
+    # length at the source keeps the stored data itself sane too.
+    cleaned = "".join(ch for ch in raw if ch.isprintable()).strip()
+    return cleaned[:_MAX_NICKNAME_LEN] or "player"
+
 
 @router.message(CommandStart())
 async def cmd_start(message: Message) -> None:
     user = message.from_user
-    display_name = user.username or user.first_name or f"player_{user.id}"
+    display_name = _sanitize_nickname(user.username or user.first_name or f"player_{user.id}")
     player = db.get_or_create_player(user.id, user.username, display_name)
 
     if user.id in config.ADMIN_CHAT_IDS:
