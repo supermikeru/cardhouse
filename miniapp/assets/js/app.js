@@ -114,6 +114,21 @@
     addressRow.addEventListener('click', function () { showToast('Откроется карта — Яндекс/Google Maps'); });
   }
 
+  /* ---------- HTML escaping ----------
+     Tournament title/subtitle/rules (admin-entered) and player nicknames
+     (defaulted from a Telegram username/first_name — settable by ANY user
+     via /start, no admin privilege needed) all flow into innerHTML below.
+     Escape at every such sink; leave textContent assignments alone (already
+     auto-escaped — double-escaping there would show literal "&amp;" etc). */
+  function escapeHtml(str) {
+    return String(str == null ? '' : str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
   /* ---------- Supabase REST helper ---------- */
   function kdFetch(path) {
     var base = (window.KD_SUPABASE_URL || '').replace(/\/$/, '');
@@ -193,7 +208,7 @@
   }
 
   function tCardHTML(t) {
-    var titleHTML = t.title + (t.subtitle ? '<em>' + t.subtitle + '</em>' : '');
+    var titleHTML = escapeHtml(t.title) + (t.subtitle ? '<em>' + escapeHtml(t.subtitle) + '</em>' : '');
     if (t.status === 'upcoming') {
       return (
         '<button type="button" class="t-card" data-open-detail="' + t.id + '">' +
@@ -269,9 +284,9 @@
     var badge = document.querySelector('[data-td="badge"]');
     badge.textContent = t.status === 'upcoming' ? 'Запись' : 'Завершён';
     badge.className = 't-card__badge' + (t.status === 'past' ? ' t-card__badge--done' : '');
-    document.querySelector('[data-td="title"]').innerHTML = t.title + (t.subtitle ? '<em>' + t.subtitle + '</em>' : '');
+    document.querySelector('[data-td="title"]').innerHTML = escapeHtml(t.title) + (t.subtitle ? '<em>' + escapeHtml(t.subtitle) + '</em>' : '');
     document.querySelector('[data-td="desc"]').textContent = t.desc;
-    document.querySelector('[data-td="rules"]').innerHTML = t.rules.map(function (r) { return '<li>' + r + '</li>'; }).join('');
+    document.querySelector('[data-td="rules"]').innerHTML = t.rules.map(function (r) { return '<li>' + escapeHtml(r) + '</li>'; }).join('');
 
     var meta = document.querySelector('[data-td="meta"]');
     if (t.status === 'upcoming') {
@@ -360,16 +375,21 @@
   var rateListEl = document.querySelector('[data-rate-list]');
 
   function fmtRank(r) {
+    // r is always one of our own rank_tiers names (server-computed), never user text.
     return '<span class="rate-row__rank ' + (RANK_CLASS[r] || '') + '">' + r + '</span>';
   }
 
   function rowHTML(row, extraClass, grad) {
+    // row.name is a player nickname — defaults to the player's own Telegram
+    // username/first_name on /start, so it's attacker-controlled text with no
+    // admin privilege required. Must be escaped before going into innerHTML.
+    var safeName = escapeHtml(row.name);
     return (
       '<div class="rate-row-wrap' + (extraClass ? ' ' + extraClass : '') + '">' +
         '<div class="rate-row' + (extraClass ? ' ' + extraClass : '') + '" data-row-toggle>' +
           '<span class="rate-row__pos">#' + row.pos + '</span>' +
-          '<span class="avatar avatar--xs" style="background:' + (grad || GRAD[row.pos % GRAD.length]) + '">' + row.name.charAt(0) + '</span>' +
-          '<span class="rate-row__body"><span class="rate-row__name">' + row.name + '</span>' + fmtRank(row.rank) + '</span>' +
+          '<span class="avatar avatar--xs" style="background:' + (grad || GRAD[row.pos % GRAD.length]) + '">' + escapeHtml(row.name.charAt(0)) + '</span>' +
+          '<span class="rate-row__body"><span class="rate-row__name">' + safeName + '</span>' + fmtRank(row.rank) + '</span>' +
           '<span class="rate-row__bounty">' + row.bounty + '</span>' +
           '<span class="rate-row__points"><svg viewBox="0 0 16 16" fill="currentColor"><use href="#i-diamond"/></svg>' + row.points + '</span>' +
           '<svg class="rate-row__chev" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><use href="#i-chevron-down"/></svg>' +
