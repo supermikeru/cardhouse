@@ -348,6 +348,26 @@
       telegram_user_id: row.telegram_user_id
     };
   }
+  function renderProfileTop3() {
+    // Separate static widget on the Профиль screen (not one of the .podium__item
+    // elements renderRating() updates) — mirrors the season podium there.
+    var wrap = document.querySelector('[data-profile-top3]');
+    if (!wrap || !RATING.season) return;
+    var podium = RATING.season.podium; // [2nd, 1st, 3rd], see loadRatingTab
+    var byRank = { 1: podium[1], 2: podium[0], 3: podium[2] };
+    [1, 2, 3].forEach(function (rank) {
+      var row = wrap.querySelector('[data-profile-top="' + rank + '"]');
+      if (!row) return;
+      var p = byRank[rank];
+      if (!p) { row.hidden = true; return; }
+      row.hidden = false;
+      row.querySelector('.avatar').textContent = p.avatar;
+      row.querySelector('.avatar').style.background = p.grad;
+      row.querySelector('.rate-row__name').textContent = p.name;
+      row.querySelector('.rate-row__points').innerHTML = '<svg fill="currentColor"><use href="#i-diamond"/></svg>' + p.points;
+    });
+  }
+
   function loadRatingTab(tab) {
     if (RATING[tab]) { renderRating(tab); return; }
     if (rateListEl) rateListEl.innerHTML = '<div class="empty-state">Загрузка…</div>';
@@ -363,10 +383,12 @@
         var me = tgId ? mapped.filter(function (r) { return r.telegram_user_id === tgId; })[0] : null;
         RATING[tab] = { podium: podium, rows: mapped.slice(3, 9), me: me || null };
         renderRating(tab);
+        if (tab === 'season') renderProfileTop3();
       })
       .catch(function () {
         RATING[tab] = { podium: [], rows: [], me: null };
         renderRating(tab);
+        if (tab === 'season') renderProfileTop3();
         showToast('Не удалось загрузить рейтинг');
       });
   }
@@ -408,12 +430,20 @@
       var order = ['second', 'first', 'third'][i]; // matches DOM order 2nd,1st,3rd
       var idx = order === 'first' ? 1 : order === 'second' ? 0 : 2;
       var p = data.podium[idx];
-      if (!p) return;
+      var ptsEl = el.querySelector('.podium__points');
+      if (!p) {
+        // No real data yet (e.g. nobody registered/played this season) — clear
+        // the design-time placeholder markup instead of leaving fake names
+        // (Acidhouze_/starzzen/Randevu) on screen looking like real results.
+        el.querySelector('.avatar').textContent = '';
+        el.querySelector('.avatar').style.background = 'var(--line, #4a3a3a)';
+        el.querySelector('.podium__name').textContent = '—';
+        ptsEl.innerHTML = '';
+        return;
+      }
       el.querySelector('.avatar').textContent = p.avatar;
       el.querySelector('.avatar').style.background = p.grad;
       el.querySelector('.podium__name').textContent = p.name;
-      el.querySelector('.podium__points').lastChild ? null : null;
-      var ptsEl = el.querySelector('.podium__points');
       ptsEl.innerHTML = '<svg fill="currentColor"><use href="#i-diamond"/></svg>' + p.points;
     });
 
