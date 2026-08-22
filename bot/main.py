@@ -21,8 +21,11 @@ def build_dispatcher() -> Dispatcher:
 
     # Everything else is admin-only.
     for r in (tournaments.router, results.router, players.router, news.router):
-        r.message.middleware(AdminOnlyMiddleware())
-        r.callback_query.middleware(AdminOnlyMiddleware())
+        # outer_middleware runs before filter/state matching, so it blocks
+        # non-admins unconditionally rather than only when some handler's
+        # filters happen to match.
+        r.message.outer_middleware(AdminOnlyMiddleware())
+        r.callback_query.outer_middleware(AdminOnlyMiddleware())
         dp.include_router(r)
 
     return dp
