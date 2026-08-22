@@ -359,8 +359,17 @@
       var row = wrap.querySelector('[data-profile-top="' + rank + '"]');
       if (!row) return;
       var p = byRank[rank];
-      if (!p) { row.hidden = true; return; }
-      row.hidden = false;
+      if (!p) {
+        // row.hidden isn't enough here — .rate-row's own display rule in
+        // styles.css has equal specificity to [hidden] and wins by cascade
+        // order, so the row would stay visible with blank fields. Use a
+        // placeholder instead, same as the main podium fallback above.
+        row.querySelector('.avatar').textContent = '';
+        row.querySelector('.avatar').style.background = 'var(--line, #4a3a3a)';
+        row.querySelector('.rate-row__name').textContent = '—';
+        row.querySelector('.rate-row__points').innerHTML = '';
+        return;
+      }
       row.querySelector('.avatar').textContent = p.avatar;
       row.querySelector('.avatar').style.background = p.grad;
       row.querySelector('.rate-row__name').textContent = p.name;
