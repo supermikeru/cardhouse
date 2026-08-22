@@ -54,7 +54,7 @@
     document.querySelectorAll('[data-panel^="' + group + '-"]').forEach(function (p) {
       p.hidden = p.dataset.panel !== (group + '-' + value);
     });
-    if (group === 'rating') renderRating(value);
+    if (group === 'rating') loadRatingTab(value);
   }
   document.querySelectorAll('.tab[data-group]').forEach(function (t) {
     t.addEventListener('click', function () { selectTab(t.dataset.group, t.dataset.subTab); });
@@ -114,44 +114,83 @@
     addressRow.addEventListener('click', function () { showToast('Откроется карта — Яндекс/Google Maps'); });
   }
 
-  /* ---------- Tournaments: mock data + list render + detail screen ---------- */
-  var TOURNAMENTS = [
-    {
-      id: 't1', status: 'upcoming', img: 'assets/img/gate-scene.jpg',
-      title: 'Королевская', subtitle: 'ночь', date: '19 августа, Ср', time: '19:00',
-      seatsTaken: 5, seatsTotal: 60, registered: false,
-      desc: 'Вечер закрытого стола для постоянных членов клуба и их гостей. Камерная атмосфера, дресс-код black tie приветствуется.',
-      rules: ['Формат: NLH, глубокий стек', 'Рассадка случайная, пересадки каждые 40 минут', 'Ребай — в течение первого часа', 'Финальный стол — по достижении 8 игроков']
-    },
-    {
-      id: 't2', status: 'upcoming', img: 'assets/img/manifesto-detail.jpg',
-      title: 'Дом полон', subtitle: '', date: '20 августа, Чт', time: '19:00',
-      seatsTaken: 4, seatsTotal: 60, registered: false,
-      desc: 'Турнир для тех, кто ценит плотную игру и долгую борьбу за столом. Без быстрых выбываний — глубокие стеки с самого старта.',
-      rules: ['Формат: NLH, deepstack', 'Уровни блайндов — 25 минут', 'Один дозаезд в первый час', 'Призовые очки — по призовой сетке клуба']
-    },
-    {
-      id: 't3', status: 'upcoming', img: 'assets/img/philosophy-detail.jpg',
-      title: 'Чёрная', subtitle: 'метка', date: '24 августа, Пн', time: '19:30',
-      seatsTaken: 0, seatsTotal: 60, registered: false,
-      desc: 'Закрытый турнир по приглашениям постоянных игроков клуба. Минимум формальностей, максимум концентрации.',
-      rules: ['Формат: NLH, турбо', 'Уровни блайндов — 15 минут', 'Без дозаездов', 'Финалисты получают статус в рейтинге сезона']
-    },
-    {
-      id: 't4', status: 'past', img: 'assets/img/philosophy-detail-2.jpg',
-      title: 'Пиковый', subtitle: 'интерес', date: '12 августа, Ср', time: '19:00',
-      place: 4, points: 320,
-      desc: 'Турнир прошёл в формате NLH deepstack, финальный стол собрал 8 сильнейших игроков вечера.',
-      rules: ['Формат: NLH, deepstack', 'Уровни блайндов — 25 минут', 'Один дозаезд в первый час']
-    },
-    {
-      id: 't5', status: 'past', img: 'assets/img/format-detail.jpg',
-      title: 'Бубновый', subtitle: 'интерес', date: '6 августа, Чт', time: '19:00',
-      place: 12, points: 80,
-      desc: 'Турнир прошёл в турбо-формате с укороченными уровнями блайндов.',
-      rules: ['Формат: NLH, турбо', 'Уровни блайндов — 15 минут', 'Без дозаездов']
+  /* ---------- Supabase REST helper ---------- */
+  function kdFetch(path) {
+    var base = (window.KD_SUPABASE_URL || '').replace(/\/$/, '');
+    var key = window.KD_SUPABASE_ANON_KEY || '';
+    return fetch(base + '/rest/v1/' + path, {
+      headers: { apikey: key, Authorization: 'Bearer ' + key }
+    }).then(function (res) {
+      if (!res.ok) throw new Error('Supabase ' + res.status + ' on ' + path);
+      return res.json();
+    });
+  }
+
+  function kdViewerTelegramId() {
+    try {
+      return (tg && tg.initDataUnsafe && tg.initDataUnsafe.user && tg.initDataUnsafe.user.id) || null;
+    } catch (e) { return null; }
+  }
+
+  var RU_MONTHS = ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'];
+  var RU_WEEKDAYS = ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
+  function fmtDate(iso) {
+    var d = new Date(iso);
+    return d.getDate() + ' ' + RU_MONTHS[d.getMonth()] + ', ' + RU_WEEKDAYS[d.getDay()];
+  }
+  function fmtTime(iso) {
+    var d = new Date(iso), h = d.getHours(), m = d.getMinutes();
+    return (h < 10 ? '0' : '') + h + ':' + (m < 10 ? '0' : '') + m;
+  }
+  function fmtPoints(n) {
+    return Number(n || 0).toLocaleString('en-US');
+  }
+
+  /* ---------- Tournaments: loaded from Supabase + list render + detail screen ---------- */
+  var TOURNAMENTS = [];
+
+  function mapTournamentRow(row, myResult) {
+    var t = {
+      id: String(row.id), status: row.status, img: row.image_url || 'assets/img/gate-scene.jpg',
+      title: row.title, subtitle: row.subtitle || '',
+      date: fmtDate(row.starts_at), time: fmtTime(row.starts_at),
+      seatsTaken: row.seats_taken, seatsTotal: row.seats_total, registered: false,
+      desc: row.description || '', rules: row.rules || []
+    };
+    if (row.status === 'past') {
+      t.place = myResult ? myResult.place : '—';
+      t.points = myResult ? myResult.points : 0;
     }
-  ];
+    return t;
+  }
+
+  function loadAndRenderTournaments() {
+    var upcomingEl = document.querySelector('[data-panel="tournaments-upcoming"]');
+    var pastEl = document.querySelector('[data-panel="tournaments-past"]');
+    [upcomingEl, pastEl].forEach(function (el) { if (el) el.innerHTML = '<div class="empty-state">Загрузка…</div>'; });
+
+    var tgId = kdViewerTelegramId();
+    var myResultsPromise = tgId
+      ? kdFetch('players?telegram_user_id=eq.' + tgId + '&select=id').then(function (players) {
+          if (!players.length) return {};
+          return kdFetch('tournament_results?player_id=eq.' + players[0].id + '&select=tournament_id,place,points').then(function (results) {
+            var map = {};
+            results.forEach(function (r) { map[r.tournament_id] = r; });
+            return map;
+          });
+        }).catch(function () { return {}; })
+      : Promise.resolve({});
+
+    Promise.all([kdFetch('tournaments?select=*&order=starts_at.asc'), myResultsPromise])
+      .then(function (res) {
+        TOURNAMENTS = res[0].map(function (row) { return mapTournamentRow(row, res[1][row.id]); });
+        renderTournamentLists();
+      })
+      .catch(function () {
+        [upcomingEl, pastEl].forEach(function (el) { if (el) el.innerHTML = '<div class="empty-state">Не удалось загрузить турниры</div>'; });
+        showToast('Не удалось загрузить турниры');
+      });
+  }
 
   function tCardHTML(t) {
     var titleHTML = t.title + (t.subtitle ? '<em>' + t.subtitle + '</em>' : '');
@@ -269,9 +308,9 @@
     });
   }
 
-  renderTournamentLists();
+  loadAndRenderTournaments();
 
-  /* ---------- Rating: mock data + render ---------- */
+  /* ---------- Rating: loaded from Supabase + render ---------- */
   var RANK_CLASS = { Rookie: 'rank-rookie', Fish: 'rank-fish', Grinder: 'rank-grinder', Silver: 'rank-silver' };
   var GRAD = [
     'linear-gradient(145deg,#8FB8D6,#4d6f89)',
@@ -281,52 +320,41 @@
     'linear-gradient(145deg,#7FA07C,#3f5a3c)'
   ];
 
-  var RATING = {
-    season: {
-      podium: [
-        { name: 'Acidhouze_', points: '5,984', avatar: 'A', grad: GRAD[0] },
-        { name: 'starzzen', points: '6,592', avatar: 'S', grad: 'linear-gradient(145deg,var(--gold),#8a6f2f)' },
-        { name: 'Randevu', points: '4,525', avatar: 'R', grad: GRAD[2] }
-      ],
-      rows: [
-        { pos: 4, name: 'K♠', rank: 'Grinder', bounty: 900, points: '3,075', base: 3075, bonus: 0 },
-        { pos: 5, name: 'Top1CzechRep…', rank: 'Grinder', bounty: 1700, points: '3,065', base: 2600, bonus: 465 },
-        { pos: 6, name: 'Мияги', rank: 'Fish', bounty: 0, points: '2,910', base: 2910, bonus: 0 },
-        { pos: 7, name: 'AJ', rank: 'Fish', bounty: 900, points: '2,688', base: 2688, bonus: 0 },
-        { pos: 8, name: 'daimendos', rank: 'Fish', bounty: 20, points: '2,410', base: 2410, bonus: 0 },
-        { pos: 9, name: 'terekkris', rank: 'Fish', bounty: 20, points: '2,105', base: 2105, bonus: 0 }
-      ],
-      me: { pos: 47, name: 'Михаил', rank: 'Rookie', bounty: 0, points: '0', base: 0, bonus: 0 }
-    },
-    all: {
-      podium: [
-        { name: 'starzzen', points: '18,220', avatar: 'S', grad: 'linear-gradient(145deg,var(--gold),#8a6f2f)' },
-        { name: 'Randevu', points: '15,940', avatar: 'R', grad: GRAD[2] },
-        { name: 'AJ', points: '14,110', avatar: 'A', grad: GRAD[3] }
-      ],
-      rows: [
-        { pos: 4, name: 'Acidhouze_', rank: 'Silver', bounty: 3100, points: '12,884', base: 11500, bonus: 1384 },
-        { pos: 5, name: 'Мияги', rank: 'Grinder', bounty: 900, points: '9,910', base: 9910, bonus: 0 },
-        { pos: 6, name: 'K♠', rank: 'Grinder', bounty: 900, points: '8,075', base: 8075, bonus: 0 },
-        { pos: 7, name: 'daimendos', rank: 'Grinder', bounty: 20, points: '6,410', base: 6410, bonus: 0 },
-        { pos: 8, name: 'terekkris', rank: 'Fish', bounty: 20, points: '4,105', base: 4105, bonus: 0 }
-      ],
-      me: { pos: 71, name: 'Михаил', rank: 'Rookie', bounty: 0, points: '0', base: 0, bonus: 0 }
-    },
-    special: {
-      podium: [
-        { name: 'Randevu', points: '2,140', avatar: 'R', grad: GRAD[2] },
-        { name: 'starzzen', points: '2,610', avatar: 'S', grad: 'linear-gradient(145deg,var(--gold),#8a6f2f)' },
-        { name: 'AJ', points: '1,895', avatar: 'A', grad: GRAD[3] }
-      ],
-      rows: [
-        { pos: 4, name: 'Acidhouze_', rank: 'Silver', bounty: 0, points: '1,410', base: 1410, bonus: 0 },
-        { pos: 5, name: 'Мияги', rank: 'Grinder', bounty: 0, points: '980', base: 980, bonus: 0 },
-        { pos: 6, name: 'K♠', rank: 'Grinder', bounty: 0, points: '640', base: 640, bonus: 0 }
-      ],
-      me: null
-    }
-  };
+  var RATING = { season: null, all: null, special: null };
+  var GOLD_GRAD = 'linear-gradient(145deg,var(--gold),#8a6f2f)';
+
+  function podiumItem(r, grad) {
+    return { name: r.name, points: r.points, avatar: r.name.charAt(0).toUpperCase(), grad: grad };
+  }
+  function mapRatingRow(row) {
+    return {
+      pos: row.pos, name: row.nickname, rank: row.rank, bounty: row.bounty,
+      points: fmtPoints(row.points), base: row.points, bonus: 0,
+      telegram_user_id: row.telegram_user_id
+    };
+  }
+  function loadRatingTab(tab) {
+    if (RATING[tab]) { renderRating(tab); return; }
+    if (rateListEl) rateListEl.innerHTML = '<div class="empty-state">Загрузка…</div>';
+    var view = tab === 'season' ? 'v_rating_season' : tab === 'special' ? 'v_rating_special' : 'v_rating_all';
+    kdFetch(view + '?select=*&order=pos.asc')
+      .then(function (data) {
+        var mapped = data.map(mapRatingRow);
+        var top3 = mapped.slice(0, 3);
+        var podium = top3.length === 3
+          ? [podiumItem(top3[1], GRAD[0]), podiumItem(top3[0], GOLD_GRAD), podiumItem(top3[2], GRAD[2])]
+          : [];
+        var tgId = kdViewerTelegramId();
+        var me = tgId ? mapped.filter(function (r) { return r.telegram_user_id === tgId; })[0] : null;
+        RATING[tab] = { podium: podium, rows: mapped.slice(3, 9), me: me || null };
+        renderRating(tab);
+      })
+      .catch(function () {
+        RATING[tab] = { podium: [], rows: [], me: null };
+        renderRating(tab);
+        showToast('Не удалось загрузить рейтинг');
+      });
+  }
 
   var podiumEls = document.querySelectorAll('.podium__item');
   var rateListEl = document.querySelector('[data-rate-list]');
@@ -383,7 +411,7 @@
     });
   }
 
-  renderRating('season');
+  loadRatingTab('season');
 
   /* ---------- Onboarding: nickname validation ---------- */
   var BANNED_WORDS = ['дурак', 'идиот', 'admin', 'moderator', 'support'];
@@ -498,4 +526,21 @@
       goScreen(target);
     }
   }
+
+  /* ---------- Deep link from bot announcement: t.me/<bot>/<app>?startapp=t_<id> ----------
+     Telegram delivers this via initDataUnsafe.start_param, not the URL hash. TOURNAMENTS
+     loads asynchronously (loadAndRenderTournaments), so poll briefly until it's populated
+     rather than racing the fetch. */
+  (function () {
+    var startParam;
+    try { startParam = tg && tg.initDataUnsafe && tg.initDataUnsafe.start_param; } catch (e) { startParam = null; }
+    if (!startParam || startParam.indexOf('t_') !== 0) return;
+    var tid = startParam.slice(2);
+    var attempts = 0;
+    (function tryOpen() {
+      attempts++;
+      if (TOURNAMENTS.length) { openTournamentDetail(tid); }
+      else if (attempts < 40) { setTimeout(tryOpen, 150); }
+    })();
+  })();
 })();
