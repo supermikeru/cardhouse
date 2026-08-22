@@ -1,9 +1,13 @@
 from __future__ import annotations
 
+from datetime import datetime, timedelta, timezone
+
 from aiogram.types import InlineKeyboardMarkup
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 import config
+
+MOSCOW_TZ = timezone(timedelta(hours=3))
 
 
 def main_menu_kb() -> InlineKeyboardMarkup:
@@ -36,7 +40,8 @@ def skip_kb(callback_data: str = "skip") -> InlineKeyboardMarkup:
 def tournaments_list_kb(tournaments: list[dict], prefix: str) -> InlineKeyboardMarkup:
     b = InlineKeyboardBuilder()
     for t in tournaments:
-        label = f"{t['title']} — {t['starts_at'][:10]}"
+        dt = datetime.fromisoformat(t["starts_at"]).astimezone(MOSCOW_TZ)
+        label = f"{t['title']} — {dt.strftime('%d.%m.%Y')}"
         b.button(text=label, callback_data=f"{prefix}:{t['id']}")
     b.adjust(1)
     return b.as_markup()

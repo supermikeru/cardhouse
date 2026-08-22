@@ -1,5 +1,5 @@
 import logging
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 
 from aiogram import Bot, F, Router
 from aiogram.filters import Command
@@ -15,6 +15,7 @@ logger = logging.getLogger(__name__)
 router = Router(name="tournaments")
 
 MOSCOW_OFFSET = "+03:00"  # club has one venue in SPb; no per-user timezone conversion needed
+MOSCOW_TZ = timezone(timedelta(hours=3))
 
 
 def parse_datetime(text: str) -> str:
@@ -22,8 +23,14 @@ def parse_datetime(text: str) -> str:
     return dt.strftime(f"%Y-%m-%dT%H:%M:00{MOSCOW_OFFSET}")
 
 
+def to_moscow(iso: str) -> datetime:
+    """Supabase/PostgREST returns timestamptz normalized to UTC regardless of the
+    offset it was written with — convert back to Moscow time before displaying."""
+    return datetime.fromisoformat(iso).astimezone(MOSCOW_TZ)
+
+
 def build_announce_draft(t: dict) -> str:
-    dt = datetime.fromisoformat(t["starts_at"])
+    dt = to_moscow(t["starts_at"])
     lines = [
         t["title"] + (f" {t['subtitle']}" if t.get("subtitle") else ""),
         "",
