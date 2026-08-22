@@ -3,4 +3,11 @@
 </IfModule>
 <IfModule mod_headers.c>
   Header set Cache-Control "no-cache, must-revalidate"
+  Header set X-Content-Type-Options "nosniff"
+  Header set Strict-Transport-Security "max-age=31536000; includeSubDomains"
+  # Telegram Desktop/mobile load the mini app in their own native WebView (no
+  # framing ancestor, so this header has no effect there). Telegram Web (the
+  # browser client) genuinely iframes it from web.telegram.org — that's the
+  # real clickjacking surface this closes.
+  Header set Content-Security-Policy "frame-ancestors 'self' https://web.telegram.org https://*.web.telegram.org https://*.telegram.org"
 </IfModule>
