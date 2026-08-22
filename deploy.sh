@@ -8,6 +8,7 @@ lftp -u "$FTP_USER","$FTP_PASS" "$FTP_HOST" <<EOF
 set ftp:ssl-allow no
 mirror --reverse --verbose --delete \
   --exclude-glob .DS_Store \
+  --exclude-glob app/ \
   site/ "$FTP_REMOTE_DIR/"
 bye
 EOF
