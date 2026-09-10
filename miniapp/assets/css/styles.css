@@ -508,6 +508,7 @@ svg { display: block; }
   background: rgba(228,196,107,0.08);
   border: 1px solid rgba(228,196,107,0.3);
 }
+.special-info[hidden] { display: none; } /* .special-info's own display:flex otherwise beats the [hidden] UA rule — see selectTab() in app.js */
 .special-info__body { flex: 1; }
 .special-info__title { font-size: 13.5px; font-weight: 700; color: var(--gold); }
 .special-info__text { margin-top: 3px; font-size: 12px; color: var(--ash); }
