@@ -22,7 +22,14 @@
       requestAnimationFrame(function () { requestAnimationFrame(nudge); });
       tg.onEvent && tg.onEvent('viewportChanged', nudge);
       document.addEventListener('visibilitychange', function () {
-        if (!document.hidden) nudge();
+        if (document.hidden) return;
+        nudge();
+        // Coming back from the background after tournaments/rating failed
+        // to load (or never got the chance to, if the WebView was
+        // suspended mid-fetch) — retry instead of leaving the screen
+        // stuck on its error state until the user force-closes the app.
+        if (tournamentsFailed) loadAndRenderTournaments();
+        if (ratingFailed.season) { RATING.season = null; loadRatingTab('season'); }
       });
 
       /* Real Telegram already shows its own WebApp chrome — our fake
@@ -146,11 +153,23 @@
   function kdFetch(path) {
     var base = (window.KD_SUPABASE_URL || '').replace(/\/$/, '');
     var key = window.KD_SUPABASE_ANON_KEY || '';
+    // A request that never settles (e.g. the WebView got backgrounded
+    // mid-fetch and the connection died silently on resume) used to leave
+    // the screen on "Загрузка…" forever — nothing downstream ever got a
+    // resolve or a reject to react to. Abort after 12s so it always ends
+    // up in the existing .catch() error handling instead.
+    var controller = window.AbortController ? new AbortController() : null;
+    var timer = controller ? setTimeout(function () { controller.abort(); }, 12000) : null;
     return fetch(base + '/rest/v1/' + path, {
-      headers: { apikey: key, Authorization: 'Bearer ' + key }
+      headers: { apikey: key, Authorization: 'Bearer ' + key },
+      signal: controller ? controller.signal : undefined
     }).then(function (res) {
+      clearTimeout(timer);
       if (!res.ok) throw new Error('Supabase ' + res.status + ' on ' + path);
       return res.json();
+    }, function (err) {
+      clearTimeout(timer);
+      throw err;
     });
   }
 
@@ -200,7 +219,10 @@
     return t;
   }
 
+  var tournamentsFailed = false;
+
   function loadAndRenderTournaments() {
+    tournamentsFailed = false;
     var upcomingEl = document.querySelector('[data-panel="tournaments-upcoming"]');
     var pastEl = document.querySelector('[data-panel="tournaments-past"]');
     [upcomingEl, pastEl].forEach(function (el) { if (el) el.innerHTML = '<div class="empty-state">Загрузка…</div>'; });
@@ -223,6 +245,7 @@
         renderTournamentLists();
       })
       .catch(function () {
+        tournamentsFailed = true;
         [upcomingEl, pastEl].forEach(function (el) { if (el) el.innerHTML = '<div class="empty-state">Не удалось загрузить турниры</div>'; });
         showToast('Не удалось загрузить турниры');
       });
@@ -492,8 +515,11 @@
       .catch(function () { /* leave design-time placeholder */ });
   }
 
+  var ratingFailed = { season: false, all: false, special: false };
+
   function loadRatingTab(tab) {
     if (RATING[tab]) { renderRating(tab); return; }
+    ratingFailed[tab] = false;
     if (rateListEl) rateListEl.innerHTML = '<div class="empty-state">Загрузка…</div>';
     var view = tab === 'season' ? 'v_rating_season' : tab === 'special' ? 'v_rating_special' : 'v_rating_all';
     kdFetch(view + '?select=*&order=pos.asc')
@@ -510,6 +536,7 @@
         if (tab === 'season') { renderProfileTop3(); renderMyProfile(); }
       })
       .catch(function () {
+        ratingFailed[tab] = true;
         RATING[tab] = { podium: [], rows: [], me: null };
         renderRating(tab);
         if (tab === 'season') { renderProfileTop3(); renderMyProfile(); }
