@@ -4,7 +4,14 @@ RewriteCond %{SERVER_PORT} !^443$
 RewriteRule .* https://%{SERVER_NAME}%{REQUEST_URI} [R,L]
 # Конец редиректа
 
+<IfModule mod_expires.c>
+  ExpiresActive Off
+</IfModule>
 <IfModule mod_headers.c>
+  # No cache-control here at all used to mean assets fell back to whatever
+  # heuristic caching the browser felt like (Safari's held onto a stale/broken
+  # copy of the gate screen for at least one visitor) — same fix as miniapp/.
+  Header set Cache-Control "no-cache, must-revalidate"
   Header set X-Content-Type-Options "nosniff"
   Header set Strict-Transport-Security "max-age=31536000; includeSubDomains"
   # Unlike miniapp/, this site is never meant to be iframed by anyone
