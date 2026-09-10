@@ -345,7 +345,7 @@
     return {
       pos: row.pos, name: row.nickname, rank: row.rank, bounty: row.bounty,
       points: fmtPoints(row.points), base: row.points, bonus: 0,
-      telegram_user_id: row.telegram_user_id
+      telegram_user_id: row.telegram_user_id, player_id: row.player_id
     };
   }
   function renderProfileTop3() {
@@ -377,6 +377,77 @@
     });
   }
 
+  /* ---------- Personal profile card: name/avatar/points/rank come from the
+     viewer's own row in the season rating (already fetched for the rating
+     screen); handle, tier progress and games/wins/streak are separate,
+     cheap follow-up queries so they don't hold up the fields above. ---------- */
+  function renderMyProfile() {
+    var me = RATING.season && RATING.season.me;
+    if (!me) return; // never /start'ed the bot — leave the design-time placeholder
+
+    var initial = me.name.charAt(0).toUpperCase();
+    document.querySelectorAll('.mini-profile__name, .profile-card__name, .qr-sheet__name').forEach(function (el) {
+      el.textContent = me.name;
+    });
+    var miniAvatar = document.querySelector('.mini-profile .avatar');
+    if (miniAvatar) miniAvatar.textContent = initial;
+    var cardAvatar = document.querySelector('.profile-card > .avatar');
+    if (cardAvatar) cardAvatar.textContent = initial;
+
+    var miniPoints = document.querySelector('.mini-profile__points');
+    if (miniPoints) miniPoints.innerHTML = '<svg fill="currentColor"><use href="#i-diamond"/></svg>' + me.points;
+    var cardPoints = document.querySelector('.profile-card__points');
+    if (cardPoints) cardPoints.innerHTML = '<svg fill="currentColor"><use href="#i-diamond"/></svg>' + me.points + ' очков';
+
+    var badgeHTML = '<span class="rank-badge__icon"><svg viewBox="0 0 16 16" fill="currentColor"><use href="#i-diamond"/></svg></span>' + me.rank;
+    document.querySelectorAll('.mini-profile .rank-badge, .profile-card .rank-badge').forEach(function (el) {
+      el.className = 'rank-badge ' + (RANK_CLASS[me.rank] || '');
+      el.innerHTML = badgeHTML;
+    });
+
+    kdFetch('rank_tiers?select=name,min_points&order=min_points.asc')
+      .then(function (tiers) {
+        var nextEl = document.querySelector('.profile-card__next');
+        if (!nextEl) return;
+        var next = tiers.filter(function (t) { return t.min_points > me.base; })[0];
+        nextEl.hidden = !next;
+        if (next) nextEl.textContent = 'до ' + next.name + ': ' + (next.min_points - me.base);
+      })
+      .catch(function () { /* leave design-time placeholder */ });
+
+    if (!me.player_id) return;
+
+    var handleEl = document.querySelector('.profile-card__handle');
+    if (handleEl) {
+      kdFetch('players?id=eq.' + me.player_id + '&select=telegram_username')
+        .then(function (rows) {
+          var username = rows[0] && rows[0].telegram_username;
+          handleEl.hidden = !username;
+          if (username) handleEl.textContent = '@' + username;
+        })
+        .catch(function () { handleEl.hidden = true; });
+    }
+
+    // Career totals across every tournament the player has a result in — not
+    // scoped to the current season like the points above, since "games
+    // played" / "win streak" read naturally as lifetime stats.
+    kdFetch('tournament_results?player_id=eq.' + me.player_id + '&select=place,tournaments(starts_at)')
+      .then(function (rows) {
+        rows.sort(function (a, b) { return new Date(a.tournaments.starts_at) - new Date(b.tournaments.starts_at); });
+        var wins = rows.filter(function (r) { return r.place === 1; }).length;
+        var streak = 0;
+        for (var i = rows.length - 1; i >= 0 && rows[i].place === 1; i--) streak++;
+
+        var gamesEl = document.querySelector('[data-stat="games"]');
+        var winsEl = document.querySelector('[data-stat="wins"]');
+        var streakEl = document.querySelector('[data-stat="streak"]');
+        if (gamesEl) gamesEl.textContent = rows.length;
+        if (winsEl) winsEl.textContent = wins;
+        if (streakEl) streakEl.textContent = streak > 0 ? streak : '—';
+      })
+      .catch(function () { /* leave design-time placeholder */ });
+  }
+
   function loadRatingTab(tab) {
     if (RATING[tab]) { renderRating(tab); return; }
     if (rateListEl) rateListEl.innerHTML = '<div class="empty-state">Загрузка…</div>';
@@ -392,12 +463,12 @@
         var me = tgId ? mapped.filter(function (r) { return r.telegram_user_id === tgId; })[0] : null;
         RATING[tab] = { podium: podium, rows: mapped.slice(3, 9), me: me || null };
         renderRating(tab);
-        if (tab === 'season') renderProfileTop3();
+        if (tab === 'season') { renderProfileTop3(); renderMyProfile(); }
       })
       .catch(function () {
         RATING[tab] = { podium: [], rows: [], me: null };
         renderRating(tab);
-        if (tab === 'season') renderProfileTop3();
+        if (tab === 'season') { renderProfileTop3(); renderMyProfile(); }
         showToast('Не удалось загрузить рейтинг');
       });
   }
