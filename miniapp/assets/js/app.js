@@ -111,7 +111,20 @@
   });
   var addressRow = document.getElementById('addressRow');
   if (addressRow) {
-    addressRow.addEventListener('click', function () { showToast('Откроется карта — Яндекс/Google Maps'); });
+    var ADDRESS_TEXT = 'Санкт-Петербург, Полтавская ул., 7';
+    var ADDRESS_MAP_URL = 'https://yandex.ru/maps/-/CThKz-07';
+    var addressSub = addressRow.querySelector('.list-row__sub');
+    addressRow.addEventListener('click', function () {
+      // First tap just reveals the address (deliberately hidden by default,
+      // same "invite-only" spirit as the marketing site's location section).
+      // Only a tap once it's showing — i.e. on the address itself — opens the map.
+      if (addressSub && !addressSub.textContent) {
+        addressSub.textContent = ADDRESS_TEXT;
+        return;
+      }
+      if (tg && tg.openLink) tg.openLink(ADDRESS_MAP_URL);
+      else window.open(ADDRESS_MAP_URL, '_blank');
+    });
   }
 
   /* ---------- HTML escaping ----------
