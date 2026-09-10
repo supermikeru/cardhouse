@@ -1,10 +1,12 @@
 from __future__ import annotations
 
+import csv
+import io
 import logging
 
 from aiogram import Bot, F, Router
 from aiogram.fsm.context import FSMContext
-from aiogram.types import CallbackQuery, Message
+from aiogram.types import BufferedInputFile, CallbackQuery, Message
 
 import db
 import keyboards
@@ -20,6 +22,19 @@ TEMPLATE_HINT = (
     "nickname (или telegram_id), place, points, bounty (необязательно)\n\n"
     "Пример строки: Мияги, 3, 320, 0"
 )
+
+
+def _build_players_template() -> bytes:
+    # nickname+telegram_id are pre-filled from the current roster so the admin
+    # only has to delete no-shows and fill in place/points/bounty for the rest —
+    # place is required per row by parsing.py, so a leftover blank-place row
+    # for someone who didn't play would fail the whole upload, not just skip them.
+    buf = io.StringIO()
+    writer = csv.writer(buf)
+    writer.writerow(["nickname", "telegram_id", "place", "points", "bounty"])
+    for p in db.list_players():
+        writer.writerow([p["nickname"], p.get("telegram_user_id") or "", "", "", ""])
+    return ("﻿" + buf.getvalue()).encode("utf-8")
 
 
 def _resolve_player(entry: dict) -> dict | None:
@@ -48,7 +63,20 @@ async def upload_ask_file(callback: CallbackQuery, state: FSMContext) -> None:
     tournament_id = int(callback.data.split(":", 1)[1])
     await state.update_data(tournament_id=tournament_id)
     await state.set_state(UploadResults.awaiting_file)
-    await callback.message.answer(TEMPLATE_HINT)
+    await callback.message.answer(TEMPLATE_HINT, reply_markup=keyboards.download_template_kb())
+    await callback.answer()
+
+
+@router.callback_query(UploadResults.awaiting_file, F.data == "res:template")
+async def upload_send_template(callback: CallbackQuery) -> None:
+    doc = BufferedInputFile(_build_players_template(), filename="players_template.csv")
+    await callback.message.answer_document(
+        doc,
+        caption=(
+            "Текущий список игроков. Удалите строки тех, кто не играл в этом турнире, "
+            "заполните place/points/bounty у остальных и пришлите файл обратно сюда же."
+        ),
+    )
     await callback.answer()
 
 

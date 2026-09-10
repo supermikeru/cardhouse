@@ -80,3 +80,9 @@ def cancel_kb() -> InlineKeyboardMarkup:
     b = InlineKeyboardBuilder()
     b.button(text="Отмена", callback_data="cancel")
     return b.as_markup()
+
+
+def download_template_kb() -> InlineKeyboardMarkup:
+    b = InlineKeyboardBuilder()
+    b.button(text="📥 Скачать список игроков", callback_data="res:template")
+    return b.as_markup()
