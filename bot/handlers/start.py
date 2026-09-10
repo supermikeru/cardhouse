@@ -1,8 +1,9 @@
-from aiogram import F, Router
+from aiogram import Bot, F, Router
 from aiogram.filters import CommandStart
 from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, Message
 
+import avatars
 import config
 import db
 import keyboards
@@ -22,10 +23,15 @@ def _sanitize_nickname(raw: str) -> str:
 
 
 @router.message(CommandStart())
-async def cmd_start(message: Message) -> None:
+async def cmd_start(message: Message, bot: Bot) -> None:
     user = message.from_user
     display_name = _sanitize_nickname(user.username or user.first_name or f"player_{user.id}")
     player = db.get_or_create_player(user.id, user.username, display_name)
+
+    # Fetched once, ever, per player — not on every /start — to keep this to a
+    # single cheap Bot API call + Storage upload rather than a recurring job.
+    if not player.get("avatar_url"):
+        await avatars.fetch_and_store_avatar(bot, user.id, player["id"])
 
     if user.id in config.ADMIN_CHAT_IDS:
         await message.answer(

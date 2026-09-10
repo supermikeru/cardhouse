@@ -18,6 +18,7 @@ def main_menu_kb() -> InlineKeyboardMarkup:
     b.button(text="📊 Загрузить результаты", callback_data="menu:upload_results")
     b.button(text="📰 Опубликовать новость", callback_data="menu:post_news")
     b.button(text="👥 Игроки", callback_data="menu:players")
+    b.button(text="🖼 Обновить аватары", callback_data="menu:refresh_avatars")
     b.button(text="🗓 Новый сезон", callback_data="menu:new_season")
     b.adjust(1)
     return b.as_markup()

@@ -1,10 +1,11 @@
 from datetime import datetime
 
-from aiogram import F, Router
+from aiogram import Bot, F, Router
 from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, Message
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
+import avatars
 import db
 import keyboards
 from states import AddPlayer, NewSeason, RenamePlayer
@@ -27,6 +28,23 @@ def _players_menu_kb():
 async def players_menu(callback: CallbackQuery) -> None:
     await callback.message.edit_text("Игроки клуба (✅ — уже писал боту):", reply_markup=_players_menu_kb())
     await callback.answer()
+
+
+@router.callback_query(F.data == "menu:refresh_avatars")
+async def refresh_avatars(callback: CallbackQuery, bot: Bot) -> None:
+    # One-off backfill for players who registered before avatars existed —
+    # new players already get this at /start, so this only ever needs to
+    # touch players still missing one.
+    missing = [p for p in db.list_players() if p.get("telegram_user_id") and not p.get("avatar_url")]
+    if not missing:
+        await callback.answer("У всех игроков с Telegram ID уже есть аватар.", show_alert=True)
+        return
+    await callback.answer("Обновляю…")
+    updated = 0
+    for p in missing:
+        if await avatars.fetch_and_store_avatar(bot, p["telegram_user_id"], p["id"]):
+            updated += 1
+    await callback.message.answer(f"Аватары обновлены: {updated} из {len(missing)}.")
 
 
 @router.callback_query(F.data.startswith("playerpick:"))

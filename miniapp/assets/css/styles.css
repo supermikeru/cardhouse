@@ -211,6 +211,7 @@ svg { display: block; }
 .avatar--md { width: 56px; height: 56px; font-size: 21px; }
 .avatar--xs { width: 34px; height: 34px; font-size: 13px; }
 .avatar--top { width: 64px; height: 64px; font-size: 23px; }
+.avatar--photo { background-size: cover; background-position: center; }
 
 .mini-profile__body { flex: 1; min-width: 0; }
 .mini-profile__name {

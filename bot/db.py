@@ -79,6 +79,18 @@ def list_players_with_telegram() -> list[dict]:
     return res.data
 
 
+def set_player_avatar(player_id: str, avatar_url: str) -> None:
+    client().table("players").update({"avatar_url": avatar_url}).eq("id", player_id).execute()
+
+
+def upload_player_avatar(file_bytes: bytes, content_type: str = "image/jpeg") -> str:
+    path = f"{uuid.uuid4().hex}.jpg"
+    client().storage.from_(config.PLAYER_AVATARS_BUCKET).upload(
+        path, file_bytes, {"content-type": content_type}
+    )
+    return client().storage.from_(config.PLAYER_AVATARS_BUCKET).get_public_url(path)
+
+
 # ---------- seasons ----------
 
 def get_current_season() -> Optional[dict]:

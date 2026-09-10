@@ -359,14 +359,40 @@
   var RATING = { season: null, all: null, special: null };
   var GOLD_GRAD = 'linear-gradient(145deg,var(--gold),#8a6f2f)';
 
+  /* ---------- Avatars: real Telegram photo if we have one (players.avatar_url,
+     fetched once by the bot at registration — see bot/avatars.py), else the
+     existing colored-initial placeholder. Two variants: one mutates an
+     existing DOM element (podium/profile widgets), one builds an HTML string
+     (rating list rows, built via innerHTML). ---------- */
+  function setAvatar(el, name, avatarUrl, grad) {
+    if (!el) return;
+    if (avatarUrl) {
+      el.classList.add('avatar--photo');
+      el.style.background = '';
+      el.style.backgroundImage = 'url(' + avatarUrl + ')';
+      el.textContent = '';
+    } else {
+      el.classList.remove('avatar--photo');
+      el.style.backgroundImage = '';
+      if (grad) el.style.background = grad; // grad omitted = leave the element's own default alone
+      el.textContent = name ? name.charAt(0).toUpperCase() : '';
+    }
+  }
+  function avatarHTML(name, avatarUrl, grad, sizeClass) {
+    var cls = 'avatar' + (sizeClass ? ' ' + sizeClass : '') + (avatarUrl ? ' avatar--photo' : '');
+    var style = avatarUrl ? 'background-image:url(' + escapeHtml(avatarUrl) + ')' : 'background:' + grad;
+    var inner = avatarUrl ? '' : escapeHtml(name.charAt(0));
+    return '<span class="' + cls + '" style="' + style + '">' + inner + '</span>';
+  }
+
   function podiumItem(r, grad) {
-    return { name: r.name, points: r.points, avatar: r.name.charAt(0).toUpperCase(), grad: grad };
+    return { name: r.name, points: r.points, avatarUrl: r.avatar_url, grad: grad };
   }
   function mapRatingRow(row) {
     return {
       pos: row.pos, name: row.nickname, rank: row.rank, bounty: row.bounty,
       points: fmtPoints(row.points), base: row.points, bonus: 0,
-      telegram_user_id: row.telegram_user_id, player_id: row.player_id
+      telegram_user_id: row.telegram_user_id, player_id: row.player_id, avatar_url: row.avatar_url
     };
   }
   function renderProfileTop3() {
@@ -385,14 +411,12 @@
         // styles.css has equal specificity to [hidden] and wins by cascade
         // order, so the row would stay visible with blank fields. Use a
         // placeholder instead, same as the main podium fallback above.
-        row.querySelector('.avatar').textContent = '';
-        row.querySelector('.avatar').style.background = 'var(--line, #4a3a3a)';
+        setAvatar(row.querySelector('.avatar'), '', null, 'var(--line, #4a3a3a)');
         row.querySelector('.rate-row__name').textContent = '—';
         row.querySelector('.rate-row__points').innerHTML = '';
         return;
       }
-      row.querySelector('.avatar').textContent = p.avatar;
-      row.querySelector('.avatar').style.background = p.grad;
+      setAvatar(row.querySelector('.avatar'), p.name, p.avatarUrl, p.grad);
       row.querySelector('.rate-row__name').textContent = p.name;
       row.querySelector('.rate-row__points').innerHTML = '<svg fill="currentColor"><use href="#i-diamond"/></svg>' + p.points;
     });
@@ -406,14 +430,13 @@
     var me = RATING.season && RATING.season.me;
     if (!me) return; // never /start'ed the bot — leave the design-time placeholder
 
-    var initial = me.name.charAt(0).toUpperCase();
     document.querySelectorAll('.mini-profile__name, .profile-card__name, .qr-sheet__name').forEach(function (el) {
       el.textContent = me.name;
     });
-    var miniAvatar = document.querySelector('.mini-profile .avatar');
-    if (miniAvatar) miniAvatar.textContent = initial;
-    var cardAvatar = document.querySelector('.profile-card > .avatar');
-    if (cardAvatar) cardAvatar.textContent = initial;
+    // No grad passed here — falls back to whichever placeholder gradient is
+    // already on the element rather than picking a new one for "yourself".
+    setAvatar(document.querySelector('.mini-profile .avatar'), me.name, me.avatar_url, null);
+    setAvatar(document.querySelector('.profile-card > .avatar'), me.name, me.avatar_url, null);
 
     var miniPoints = document.querySelector('.mini-profile__points');
     if (miniPoints) miniPoints.innerHTML = '<svg fill="currentColor"><use href="#i-diamond"/></svg>' + me.points;
@@ -511,7 +534,7 @@
       '<div class="rate-row-wrap' + (extraClass ? ' ' + extraClass : '') + '">' +
         '<div class="rate-row' + (extraClass ? ' ' + extraClass : '') + '" data-row-toggle>' +
           '<span class="rate-row__pos">#' + row.pos + '</span>' +
-          '<span class="avatar avatar--xs" style="background:' + (grad || GRAD[row.pos % GRAD.length]) + '">' + escapeHtml(row.name.charAt(0)) + '</span>' +
+          avatarHTML(row.name, row.avatar_url, grad || GRAD[row.pos % GRAD.length], 'avatar--xs') +
           '<span class="rate-row__body"><span class="rate-row__name">' + safeName + '</span>' + fmtRank(row.rank) + '</span>' +
           '<span class="rate-row__bounty">' + row.bounty + '</span>' +
           '<span class="rate-row__points"><svg viewBox="0 0 16 16" fill="currentColor"><use href="#i-diamond"/></svg>' + row.points + '</span>' +
@@ -536,14 +559,12 @@
         // No real data yet (e.g. nobody registered/played this season) — clear
         // the design-time placeholder markup instead of leaving fake names
         // (Acidhouze_/starzzen/Randevu) on screen looking like real results.
-        el.querySelector('.avatar').textContent = '';
-        el.querySelector('.avatar').style.background = 'var(--line, #4a3a3a)';
+        setAvatar(el.querySelector('.avatar'), '', null, 'var(--line, #4a3a3a)');
         el.querySelector('.podium__name').textContent = '—';
         ptsEl.innerHTML = '';
         return;
       }
-      el.querySelector('.avatar').textContent = p.avatar;
-      el.querySelector('.avatar').style.background = p.grad;
+      setAvatar(el.querySelector('.avatar'), p.name, p.avatarUrl, p.grad);
       el.querySelector('.podium__name').textContent = p.name;
       ptsEl.innerHTML = '<svg fill="currentColor"><use href="#i-diamond"/></svg>' + p.points;
     });
