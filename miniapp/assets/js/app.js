@@ -243,6 +243,7 @@
       .then(function (res) {
         TOURNAMENTS = res[0].map(function (row) { return mapTournamentRow(row, res[1][row.id]); });
         renderTournamentLists();
+        renderHistory();
       })
       .catch(function () {
         tournamentsFailed = true;
@@ -290,6 +291,23 @@
     if (pastEl) pastEl.innerHTML = past.map(tCardHTML).join('');
     if (featuredEl && upcoming[0]) featuredEl.innerHTML = tCardHTML(upcoming[0]);
     document.querySelectorAll('[data-open-detail]').forEach(function (btn) {
+      btn.addEventListener('click', function () { openTournamentDetail(btn.dataset.openDetail); });
+    });
+  }
+
+  /* ---------- "История игр" on the Профиль screen: personal record of
+     tournaments actually played (place !== '—' means a result exists for
+     the viewer), reusing the same card markup as Турниры → Прошедшие.
+     "Активные" is left as the design-time placeholder — there's no
+     persisted per-viewer registration to show there (t.registered above
+     is session-only UI state, not backed by a table). ---------- */
+  function renderHistory() {
+    var pastEl = document.querySelector('[data-panel="history-past"]');
+    if (!pastEl) return;
+    var played = TOURNAMENTS.filter(function (t) { return t.status === 'past' && t.place !== undefined && t.place !== '—'; });
+    if (!played.length) return; // leave the "Турниров ещё нет" placeholder
+    pastEl.innerHTML = played.map(tCardHTML).join('');
+    pastEl.querySelectorAll('[data-open-detail]').forEach(function (btn) {
       btn.addEventListener('click', function () { openTournamentDetail(btn.dataset.openDetail); });
     });
   }
