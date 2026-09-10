@@ -8,7 +8,6 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;0,800;0,900;1,500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/css/styles.css?v=7">
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
 
@@ -416,7 +415,33 @@
   <div class="toast" data-toast></div>
 </div>
 
-<script src="assets/js/config.js?v=1"></script>
-<script src="assets/js/app.js?v=11"></script>
+<script>
+(function () {
+  // The Telegram SDK used to be a plain blocking <script> in <head>. On a
+  // bad connection that hangs the whole page — nothing in <body> even
+  // parses/paints, and app.js (which calls Telegram.WebApp.ready() to
+  // dismiss Telegram's own loading screen) never runs, so the mini app
+  // looks permanently stuck on Telegram's generic loading placeholder.
+  // Race it against a timeout instead: if it hasn't loaded by then, boot
+  // the app anyway — app.js already runs fine without window.Telegram
+  // (that's how the plain-browser preview works).
+  function loadScript(src, onDone) {
+    var s = document.createElement('script');
+    s.src = src;
+    s.async = false; // keep relative execution order for the scripts below
+    s.onload = s.onerror = function () { s.onload = s.onerror = null; onDone(); };
+    document.body.appendChild(s);
+  }
+  function bootApp() {
+    loadScript('assets/js/config.js?v=1', function () {
+      loadScript('assets/js/app.js?v=11', function () {});
+    });
+  }
+  var booted = false;
+  function bootOnce() { if (booted) return; booted = true; bootApp(); }
+  loadScript('https://telegram.org/js/telegram-web-app.js', bootOnce);
+  setTimeout(bootOnce, 4000);
+})();
+</script>
 </body>
 </html>
