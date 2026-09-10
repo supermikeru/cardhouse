@@ -165,14 +165,22 @@
   var TOURNAMENTS = [];
 
   function mapTournamentRow(row, myResult) {
+    // row.status only flips to 'past' when the admin uploads results for the
+    // tournament (bot/handlers/results.py, mark_tournament_finished) — that
+    // can happen a day or more after the event. Treat a tournament as past
+    // the moment its start time has elapsed too, so it moves to the "Прошедшие"
+    // list and closes registration right away instead of waiting on that
+    // upload. myResult naturally stays undefined until results actually land,
+    // so the place/points fall back to the existing "—" placeholder below.
+    var isPast = row.status === 'past' || new Date(row.starts_at).getTime() <= Date.now();
     var t = {
-      id: String(row.id), status: row.status, img: row.image_url || 'assets/img/gate-scene.jpg',
+      id: String(row.id), status: isPast ? 'past' : 'upcoming', img: row.image_url || 'assets/img/gate-scene.jpg',
       title: row.title, subtitle: row.subtitle || '',
       date: fmtDate(row.starts_at), time: fmtTime(row.starts_at),
       seatsTaken: row.seats_taken, seatsTotal: row.seats_total, registered: false,
       desc: row.description || '', rules: row.rules || []
     };
-    if (row.status === 'past') {
+    if (isPast) {
       t.place = myResult ? myResult.place : '—';
       t.points = myResult ? myResult.points : 0;
     }

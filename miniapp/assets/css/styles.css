@@ -337,6 +337,7 @@ svg { display: block; }
 }
 
 .t-list { display: flex; flex-direction: column; gap: 16px; padding: 0 20px 8px; }
+.t-list[hidden] { display: none; } /* .t-list's own display:flex otherwise beats the [hidden] UA rule — see selectTab() in app.js */
 .t-card {
   display: block;
   width: 100%;
