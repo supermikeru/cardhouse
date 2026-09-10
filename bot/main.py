@@ -1,3 +1,4 @@
+import asyncio
 import logging
 
 from aiogram import Bot, Dispatcher
@@ -6,18 +7,23 @@ from aiogram.webhook.aiohttp_server import SimpleRequestHandler, setup_applicati
 from aiohttp import web
 
 import config
-from handlers import news, players, results, start, tournaments
+import db
+from handlers import news, players, registrations, results, start, tournaments
 from middlewares.admin_only import AdminOnlyMiddleware
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+_REMINDER_CHECK_INTERVAL = 3600  # seconds
+
 
 def build_dispatcher() -> Dispatcher:
     dp = Dispatcher(storage=MemoryStorage())
 
-    # Open to everyone — this is what auto-registers a new player on /start.
+    # Open to everyone — this is what auto-registers a new player on /start,
+    # and lets any player tap "Записаться на игру" on a tournament announcement.
     dp.include_router(start.router)
+    dp.include_router(registrations.router)
 
     # Everything else is admin-only.
     for r in (tournaments.router, results.router, players.router, news.router):
@@ -34,7 +40,38 @@ def build_dispatcher() -> Dispatcher:
     return dp
 
 
+async def remind_registered_players(bot: Bot) -> None:
+    # Runs for the lifetime of the process, checking hourly for tournaments
+    # starting in ~24h. Render's free plan spins the whole process down after
+    # 15 minutes with no incoming HTTP traffic, which pauses this loop along
+    # with everything else — a reminder due during a quiet stretch only goes
+    # out once something (a player, an admin) wakes the service back up.
+    while True:
+        try:
+            due = db.get_pending_reminders()
+            reminded_ids = []
+            for r in due:
+                player = r.get("players") or {}
+                tournament = r.get("tournaments") or {}
+                chat_id = player.get("telegram_user_id")
+                if not chat_id:
+                    continue
+                try:
+                    await bot.send_message(
+                        chat_id,
+                        f"⏰ Напоминание: завтра турнир «{tournament.get('title')}» — не забудьте прийти!",
+                    )
+                except Exception:
+                    logger.warning("Reminder failed for chat_id=%s", chat_id, exc_info=True)
+                reminded_ids.append(r["id"])
+            db.mark_reminded(reminded_ids)
+        except Exception:
+            logger.exception("Reminder check failed")
+        await asyncio.sleep(_REMINDER_CHECK_INTERVAL)
+
+
 async def on_startup(bot: Bot) -> None:
+    asyncio.create_task(remind_registered_players(bot))
     if not config.WEBHOOK_BASE_URL:
         logger.warning("WEBHOOK_BASE_URL/RENDER_EXTERNAL_URL is not set — webhook was not registered.")
         return

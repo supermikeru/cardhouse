@@ -196,20 +196,20 @@
   /* ---------- Tournaments: loaded from Supabase + list render + detail screen ---------- */
   var TOURNAMENTS = [];
 
-  function mapTournamentRow(row, myResult) {
+  function mapTournamentRow(row, myResult, isRegistered) {
     // row.status only flips to 'past' when the admin uploads results for the
     // tournament (bot/handlers/results.py, mark_tournament_finished) — that
     // can happen a day or more after the event. Treat a tournament as past
     // the moment its start time has elapsed too, so it moves to the "Прошедшие"
-    // list and closes registration right away instead of waiting on that
-    // upload. myResult naturally stays undefined until results actually land,
-    // so the place/points fall back to the existing "—" placeholder below.
+    // list right away instead of waiting on that upload. myResult naturally
+    // stays undefined until results actually land, so the place/points fall
+    // back to the existing "—" placeholder below.
     var isPast = row.status === 'past' || new Date(row.starts_at).getTime() <= Date.now();
     var t = {
       id: String(row.id), status: isPast ? 'past' : 'upcoming', img: row.image_url || 'assets/img/gate-scene.jpg',
       title: row.title, subtitle: row.subtitle || '',
       date: fmtDate(row.starts_at), time: fmtTime(row.starts_at),
-      seatsTaken: row.seats_taken, seatsTotal: row.seats_total, registered: false,
+      seatsTaken: row.seats_taken, seatsTotal: row.seats_total, registered: !!isRegistered,
       desc: row.description || '', rules: row.rules || []
     };
     if (isPast) {
@@ -227,21 +227,35 @@
     var pastEl = document.querySelector('[data-panel="tournaments-past"]');
     [upcomingEl, pastEl].forEach(function (el) { if (el) el.innerHTML = '<div class="empty-state">Загрузка…</div>'; });
 
+    // Registration itself only ever happens via the "Записаться на игру"
+    // button on the bot's own announcement message (a real Telegram
+    // callback, so the bot always knows exactly who tapped it) — the mini
+    // app only reads tournament_registrations here, to show "Вы записаны"
+    // context and populate История игр → Активные.
     var tgId = kdViewerTelegramId();
-    var myResultsPromise = tgId
+    var myDataPromise = tgId
       ? kdFetch('players?telegram_user_id=eq.' + tgId + '&select=id').then(function (players) {
-          if (!players.length) return {};
-          return kdFetch('tournament_results?player_id=eq.' + players[0].id + '&select=tournament_id,place,points').then(function (results) {
-            var map = {};
-            results.forEach(function (r) { map[r.tournament_id] = r; });
-            return map;
+          if (!players.length) return { results: {}, registered: {} };
+          var pid = players[0].id;
+          // Каждый подзапрос со своим catch: если, скажем, tournament_registrations
+          // ещё не существует (миграция 003 не применена), это не должно
+          // портить уже рабочие tournament_results, и наоборот.
+          var resultsP = kdFetch('tournament_results?player_id=eq.' + pid + '&select=tournament_id,place,points')
+            .then(function (rows) { var m = {}; rows.forEach(function (r) { m[r.tournament_id] = r; }); return m; })
+            .catch(function () { return {}; });
+          var registeredP = kdFetch('tournament_registrations?player_id=eq.' + pid + '&select=tournament_id')
+            .then(function (rows) { var m = {}; rows.forEach(function (r) { m[r.tournament_id] = true; }); return m; })
+            .catch(function () { return {}; });
+          return Promise.all([resultsP, registeredP]).then(function (res) {
+            return { results: res[0], registered: res[1] };
           });
-        }).catch(function () { return {}; })
-      : Promise.resolve({});
+        }).catch(function () { return { results: {}, registered: {} }; })
+      : Promise.resolve({ results: {}, registered: {} });
 
-    Promise.all([kdFetch('tournaments?select=*&order=starts_at.asc'), myResultsPromise])
+    Promise.all([kdFetch('tournaments?select=*&order=starts_at.asc'), myDataPromise])
       .then(function (res) {
-        TOURNAMENTS = res[0].map(function (row) { return mapTournamentRow(row, res[1][row.id]); });
+        var mine = res[1];
+        TOURNAMENTS = res[0].map(function (row) { return mapTournamentRow(row, mine.results[row.id], mine.registered[row.id]); });
         renderTournamentLists();
         renderHistory();
       })
@@ -295,45 +309,28 @@
     });
   }
 
-  /* ---------- "История игр" on the Профиль screen: personal record of
-     tournaments actually played (place !== '—' means a result exists for
-     the viewer), reusing the same card markup as Турниры → Прошедшие.
-     "Активные" is left as the design-time placeholder — there's no
-     persisted per-viewer registration to show there (t.registered above
-     is session-only UI state, not backed by a table). ---------- */
-  function renderHistory() {
-    var pastEl = document.querySelector('[data-panel="history-past"]');
-    if (!pastEl) return;
-    var played = TOURNAMENTS.filter(function (t) { return t.status === 'past' && t.place !== undefined && t.place !== '—'; });
-    if (!played.length) return; // leave the "Турниров ещё нет" placeholder
-    pastEl.innerHTML = played.map(tCardHTML).join('');
-    pastEl.querySelectorAll('[data-open-detail]').forEach(function (btn) {
+  /* ---------- "История игр" on the Профиль screen: Активные is upcoming
+     tournaments the player registered for via the bot's own announcement
+     button (bot/handlers/registrations.py — a real Telegram callback, not
+     anything the mini app writes); Прошедшие is tournaments actually played
+     (place !== '—' means a tournament_results row exists for the viewer).
+     Both reuse tCardHTML, the same card Турниры → Актуальные/Прошедшие
+     already render. ---------- */
+  function fillHistoryPanel(panelSelector, list) {
+    var el = document.querySelector(panelSelector);
+    if (!el || !list.length) return; // leave the "Турниров ещё нет" placeholder
+    el.innerHTML = list.map(tCardHTML).join('');
+    el.querySelectorAll('[data-open-detail]').forEach(function (btn) {
       btn.addEventListener('click', function () { openTournamentDetail(btn.dataset.openDetail); });
     });
   }
 
-  var currentDetailId = null;
-  var detailAction = document.querySelector('[data-td="action"]');
-
-  function updateDetailAction(t) {
-    if (!detailAction) return;
-    if (t.status === 'past') {
-      detailAction.parentElement.hidden = true;
-      return;
-    }
-    detailAction.parentElement.hidden = false;
-    var full = t.seatsTaken >= t.seatsTotal && !t.registered;
-    if (t.registered) {
-      detailAction.textContent = 'Отменить запись';
-      detailAction.className = 'btn btn--outline';
-      detailAction.style.width = '100%';
-    } else {
-      detailAction.textContent = full ? 'Мест нет' : 'Записаться на турнир';
-      detailAction.className = 'btn btn--primary';
-      detailAction.style.width = '100%';
-      detailAction.disabled = full;
-    }
+  function renderHistory() {
+    fillHistoryPanel('[data-panel="history-active"]', TOURNAMENTS.filter(function (t) { return t.status === 'upcoming' && t.registered; }));
+    fillHistoryPanel('[data-panel="history-past"]', TOURNAMENTS.filter(function (t) { return t.status === 'past' && t.place !== undefined && t.place !== '—'; }));
   }
+
+  var currentDetailId = null;
 
   function openTournamentDetail(id) {
     var t = TOURNAMENTS.filter(function (x) { return x.id === id; })[0];
@@ -369,20 +366,7 @@
       resultWrap.hidden = true;
     }
 
-    updateDetailAction(t);
     window.scrollTo(0, 0);
-  }
-
-  if (detailAction) {
-    detailAction.addEventListener('click', function () {
-      var t = TOURNAMENTS.filter(function (x) { return x.id === currentDetailId; })[0];
-      if (!t || t.status === 'past' || detailAction.disabled) return;
-      t.registered = !t.registered;
-      t.seatsTaken += t.registered ? 1 : -1;
-      updateDetailAction(t);
-      renderTournamentLists();
-      showToast(t.registered ? 'Вы записаны на турнир' : 'Запись отменена');
-    });
   }
 
   loadAndRenderTournaments();

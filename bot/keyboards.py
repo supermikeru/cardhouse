@@ -5,8 +5,6 @@ from datetime import datetime, timedelta, timezone
 from aiogram.types import InlineKeyboardMarkup
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
-import config
-
 MOSCOW_TZ = timezone(timedelta(hours=3))
 
 
@@ -62,9 +60,14 @@ def edit_field_kb() -> InlineKeyboardMarkup:
 
 
 def registration_button(tournament_id: int) -> InlineKeyboardMarkup:
-    url = f"https://t.me/{config.BOT_USERNAME}/{config.MINIAPP_SHORT_NAME}?startapp=t_{tournament_id}"
     b = InlineKeyboardBuilder()
-    b.button(text="🃏 Записаться на игру", url=url)
+    b.button(text="🃏 Записаться на игру", callback_data=f"register:{tournament_id}")
+    return b.as_markup()
+
+
+def registered_button(tournament_id: int) -> InlineKeyboardMarkup:
+    b = InlineKeyboardBuilder()
+    b.button(text="✅ Вы записаны — отменить", callback_data=f"unregister:{tournament_id}")
     return b.as_markup()
 
 

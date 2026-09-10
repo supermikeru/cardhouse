@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import uuid
+from datetime import datetime, timedelta, timezone
 from typing import Optional
 
 from supabase import Client, create_client
@@ -177,6 +178,54 @@ def get_unnotified_results(tournament_id: int) -> list[dict]:
         .execute()
     )
     return res.data
+
+
+# ---------- tournament registrations ----------
+# Writes go through register_for_tournament/unregister_from_tournament, two
+# Postgres functions (migration 003) that lock the tournament row for the
+# duration of the check-then-insert-then-increment — bot/handlers/registrations.py
+# is the only caller (a real Telegram callback tells us exactly who tapped
+# the button), and without that lock two people tapping "Записаться" on the
+# last seat at the same moment could both get seated.
+
+def register_for_tournament(tournament_id: int, player_id: str) -> str:
+    res = client().rpc("register_for_tournament", {"p_tournament_id": tournament_id, "p_player_id": player_id}).execute()
+    return res.data
+
+
+def unregister_from_tournament(tournament_id: int, player_id: str) -> str:
+    res = client().rpc("unregister_from_tournament", {"p_tournament_id": tournament_id, "p_player_id": player_id}).execute()
+    return res.data
+
+
+def get_pending_reminders() -> list[dict]:
+    """Registrations for still-upcoming tournaments starting in ~24h that
+    haven't been reminded yet. The window filter runs in Python, not SQL —
+    at this club's scale a full scan of not-yet-reminded rows is cheap, and
+    it avoids relational filtering on embedded tournament fields."""
+    res = (
+        client()
+        .table("tournament_registrations")
+        .select("id, players(telegram_user_id, nickname), tournaments(title, starts_at, status)")
+        .eq("reminded", False)
+        .execute()
+    )
+    now = datetime.now(timezone.utc)
+    window_start, window_end = now + timedelta(hours=23), now + timedelta(hours=25)
+    due = []
+    for r in res.data:
+        t = r.get("tournaments") or {}
+        if t.get("status") != "upcoming" or not t.get("starts_at"):
+            continue
+        starts_at = datetime.fromisoformat(t["starts_at"])
+        if window_start <= starts_at <= window_end:
+            due.append(r)
+    return due
+
+
+def mark_reminded(registration_ids: list[int]) -> None:
+    if registration_ids:
+        client().table("tournament_registrations").update({"reminded": True}).in_("id", registration_ids).execute()
 
 
 def mark_results_notified(result_ids: list[int]) -> None:

@@ -25,8 +25,5 @@ WEBHOOK_PATH = f"/webhook/{WEBHOOK_SECRET}"
 
 PORT = int(os.environ.get("PORT", "10000"))
 
-BOT_USERNAME = os.environ.get("BOT_USERNAME", "")
-MINIAPP_SHORT_NAME = os.environ.get("MINIAPP_SHORT_NAME", "app")
-
 TOURNAMENT_IMAGES_BUCKET = "tournament-images"
 PLAYER_AVATARS_BUCKET = "player-avatars"

@@ -17,7 +17,3 @@ services:
         sync: false
       - key: WEBHOOK_SECRET
         sync: false
-      - key: BOT_USERNAME
-        sync: false
-      - key: MINIAPP_SHORT_NAME
-        sync: false
