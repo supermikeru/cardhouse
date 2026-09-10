@@ -360,48 +360,18 @@
   </button>
 
   <!-- ============ SHEETS ============ -->
-  <div class="sheet-overlay" data-sheet-overlay="nickname" data-open="true">
+  <div class="sheet-overlay" data-sheet-overlay="nickname">
     <div class="sheet">
       <div class="sheet__grip"></div>
       <div class="sheet__icon"><svg fill="none" stroke="currentColor"><use href="#i-user"/></svg></div>
       <h3 class="sheet__title">Ваш ник в клубе</h3>
       <p class="sheet__text">Под этим ником ты появишься в рейтинге и в списках турниров. Можешь оставить как есть или изменить.</p>
       <span class="sheet__label">Ник</span>
-      <input class="sheet__input" id="nicknameInput" type="text" value="mikechaschin" maxlength="20">
+      <input class="sheet__input" id="nicknameInput" type="text" maxlength="20">
       <p class="sheet__hint" data-nick-hint>От 2 до 20 символов. Запрещены оскорбления и системные слова.</p>
       <p class="sheet__error" data-nick-error hidden></p>
       <button type="button" class="btn btn--primary" id="nicknameConfirm">Подтвердить и продолжить</button>
       <button type="button" class="btn btn--ghost" data-close-sheet="nickname" style="margin:0 auto">Отмена</button>
-    </div>
-  </div>
-
-  <div class="sheet-overlay" data-sheet-overlay="email">
-    <div class="sheet">
-      <button type="button" class="sheet__close" data-close-sheet="email"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><use href="#i-close"/></svg></button>
-      <div class="sheet__icon"><svg fill="none" stroke="currentColor"><use href="#i-mail"/></svg></div>
-      <h3 class="sheet__title">Добавьте Email</h3>
-      <p class="sheet__text">Чтобы получать уведомления о турнирах и результатах — укажите почту.</p>
-      <input class="sheet__input" id="emailInput" type="email" placeholder="name@example.com">
-      <button type="button" class="btn btn--primary" id="emailSubmit" style="margin-top:12px">Получить код</button>
-      <button type="button" class="btn btn--ghost" data-close-sheet="email" style="margin:0 auto">Пропустить</button>
-    </div>
-  </div>
-
-  <div class="sheet-overlay" data-sheet-overlay="otp">
-    <div class="sheet">
-      <button type="button" class="sheet__close" data-close-sheet="otp"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><use href="#i-close"/></svg></button>
-      <div class="sheet__icon"><svg fill="none" stroke="currentColor"><use href="#i-lock"/></svg></div>
-      <h3 class="sheet__title">Введите код</h3>
-      <p class="sheet__text">Мы отправили 4-значный код на <b id="otpEmailTarget" style="color:var(--ivory)">почту</b></p>
-      <div class="otp-inputs" id="otpInputs">
-        <input class="otp-box" inputmode="numeric" pattern="[0-9]*" maxlength="1">
-        <input class="otp-box" inputmode="numeric" pattern="[0-9]*" maxlength="1">
-        <input class="otp-box" inputmode="numeric" pattern="[0-9]*" maxlength="1">
-        <input class="otp-box" inputmode="numeric" pattern="[0-9]*" maxlength="1">
-      </div>
-      <p class="sheet__hint" style="text-align:center">Отправить код повторно через <span id="otpTimer">00:59</span></p>
-      <button type="button" class="btn btn--ghost" id="otpResend" style="margin:0 auto 12px" disabled>Отправить ещё раз</button>
-      <button type="button" class="btn btn--primary" id="otpConfirm">Подтвердить</button>
     </div>
   </div>
 
@@ -447,6 +417,6 @@
 </div>
 
 <script src="assets/js/config.js?v=1"></script>
-<script src="assets/js/app.js?v=8"></script>
+<script src="assets/js/app.js?v=9"></script>
 </body>
 </html>

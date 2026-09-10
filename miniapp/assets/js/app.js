@@ -472,7 +472,7 @@
 
   loadRatingTab('season');
 
-  /* ---------- Onboarding: nickname validation ---------- */
+  /* ---------- Onboarding: nickname (shown once, prefilled with the real nickname) ---------- */
   var BANNED_WORDS = ['дурак', 'идиот', 'admin', 'moderator', 'support'];
   var nickInput = document.getElementById('nicknameInput');
   var nickError = document.querySelector('[data-nick-error]');
@@ -495,81 +495,48 @@
     if (nickConfirm) nickConfirm.disabled = !valid;
     return valid;
   }
-  if (nickInput) {
-    nickInput.addEventListener('input', validateNickname);
-    validateNickname();
-  }
+  if (nickInput) nickInput.addEventListener('input', validateNickname);
   if (nickConfirm) {
     nickConfirm.addEventListener('click', function () {
       if (!validateNickname()) return;
       closeSheet('nickname');
-      openSheet('email');
     });
   }
 
-  /* ---------- Onboarding: email → OTP ---------- */
-  var emailInput = document.getElementById('emailInput');
-  var emailSubmit = document.getElementById('emailSubmit');
-  var otpTarget = document.getElementById('otpEmailTarget');
-  var otpBoxes = document.querySelectorAll('#otpInputs .otp-box');
-  var otpTimerEl = document.getElementById('otpTimer');
-  var otpResend = document.getElementById('otpResend');
-  var otpConfirm = document.getElementById('otpConfirm');
-  var otpCountdown = null;
+  (function () {
+    var overlay = document.querySelector('[data-sheet-overlay="nickname"]');
+    if (!overlay || !nickInput) return;
 
-  function startOtpCountdown() {
-    var seconds = 59;
-    if (otpResend) otpResend.disabled = true;
-    clearInterval(otpCountdown);
-    otpCountdown = setInterval(function () {
-      seconds--;
-      if (otpTimerEl) otpTimerEl.textContent = '00:' + (seconds < 10 ? '0' : '') + seconds;
-      if (seconds <= 0) {
-        clearInterval(otpCountdown);
-        if (otpResend) otpResend.disabled = false;
-        if (otpTimerEl) otpTimerEl.textContent = '00:00';
+    // "First launch" is tracked per Telegram user in localStorage (there's no
+    // server-side flag for it) — covers confirm, the Отмена button, and
+    // tapping outside the sheet, since all three just flip data-open to
+    // false rather than funnelling through one handler.
+    var tgId = kdViewerTelegramId();
+    var onboardKey = 'kd_nickname_onboarded_' + (tgId || 'guest');
+    var alreadySeen;
+    try { alreadySeen = localStorage.getItem(onboardKey) === '1'; } catch (e) { alreadySeen = false; }
+    new MutationObserver(function () {
+      if (overlay.getAttribute('data-open') !== 'true') {
+        try { localStorage.setItem(onboardKey, '1'); } catch (e) { /* ignore */ }
       }
-    }, 1000);
-  }
+    }).observe(overlay, { attributes: true, attributeFilter: ['data-open'] });
 
-  if (emailSubmit) {
-    emailSubmit.addEventListener('click', function () {
-      var val = emailInput ? emailInput.value.trim() : '';
-      var validEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val);
-      if (!validEmail) { showToast('Введите корректный email'); return; }
-      if (otpTarget) otpTarget.textContent = val;
-      closeSheet('email');
-      openSheet('otp');
-      otpBoxes.forEach(function (b) { b.value = ''; });
-      if (otpBoxes[0]) otpBoxes[0].focus();
-      startOtpCountdown();
+    if (alreadySeen) return;
+
+    var fallbackName = (tg && tg.initDataUnsafe && tg.initDataUnsafe.user &&
+      (tg.initDataUnsafe.user.username || tg.initDataUnsafe.user.first_name)) || '';
+    var currentNickname = tgId
+      ? kdFetch('players?telegram_user_id=eq.' + tgId + '&select=nickname').then(function (rows) {
+          return (rows[0] && rows[0].nickname) || fallbackName;
+        }).catch(function () { return fallbackName; })
+      : Promise.resolve(fallbackName);
+
+    currentNickname.then(function (name) {
+      nickInput.value = name;
+      validateNickname();
+      openSheet('nickname');
     });
-  }
-  if (otpResend) {
-    otpResend.addEventListener('click', function () {
-      if (otpResend.disabled) return;
-      showToast('Код отправлен повторно');
-      startOtpCountdown();
-    });
-  }
-  otpBoxes.forEach(function (box, i) {
-    box.addEventListener('input', function () {
-      box.value = box.value.replace(/[^0-9]/g, '');
-      if (box.value && otpBoxes[i + 1]) otpBoxes[i + 1].focus();
-    });
-    box.addEventListener('keydown', function (e) {
-      if (e.key === 'Backspace' && !box.value && otpBoxes[i - 1]) otpBoxes[i - 1].focus();
-    });
-  });
-  if (otpConfirm) {
-    otpConfirm.addEventListener('click', function () {
-      var code = Array.prototype.map.call(otpBoxes, function (b) { return b.value; }).join('');
-      if (code.length < 4) { showToast('Введите 4-значный код'); return; }
-      clearInterval(otpCountdown);
-      closeSheet('otp');
-      showToast('Email подтверждён');
-    });
-  }
+  })();
 
   /* ---------- Preview-only deep link: #kd:screen or #kd:sheet:id ----------
      Namespaced so it never collides with Telegram's own hash params
