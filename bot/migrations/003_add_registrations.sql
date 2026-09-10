@@ -66,3 +66,12 @@ begin
   return 'ok';
 end;
 $$;
+
+-- Postgres grants EXECUTE on new functions to PUBLIC by default, which would
+-- let the mini app's public anon key call these two directly via PostgREST's
+-- /rest/v1/rpc/<fn>, bypassing the bot's Telegram-verified callback entirely.
+-- Only the bot (service_role) should ever call them.
+revoke execute on function register_for_tournament(bigint, uuid) from public, anon, authenticated;
+revoke execute on function unregister_from_tournament(bigint, uuid) from public, anon, authenticated;
+grant execute on function register_for_tournament(bigint, uuid) to service_role;
+grant execute on function unregister_from_tournament(bigint, uuid) to service_role;
